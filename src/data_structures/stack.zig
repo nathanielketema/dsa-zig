@@ -73,7 +73,9 @@ pub fn StackLinkedList(comptime T: type) type {
 
         pub fn peek(self: Self) ?T {
             assert((self.count == 0) == (self.head == null));
-            return self.head.value orelse null;
+            if (self.head) |head| {
+                return head.value;
+            } else return null;
         }
 
         pub fn empty(self: Self) bool {
@@ -107,6 +109,7 @@ pub fn StackLinkedList(comptime T: type) type {
             std.debug.print("null", .{});
         }
     };
+}
 
     // Todo:
     //   - init
