@@ -1,5 +1,6 @@
 const std = @import("std");
 const assert = std.debug.assert;
+const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
 pub fn Stack(comptime T: type) type {
@@ -105,9 +106,7 @@ pub fn Stack(comptime T: type) type {
     };
 }
 
-const testing = std.testing;
-
-test "test 1" {
+test "test stack operations" {
     var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
