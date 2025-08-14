@@ -76,6 +76,10 @@ pub fn StackLinkedList(comptime T: type) type {
             return self.head.value orelse null;
         }
 
+        pub fn empty(self: Self) bool {
+            assert((self.count == 0) == (self.head == null));
+            return self.head == null;
+        }
     };
 
     // Todo:
