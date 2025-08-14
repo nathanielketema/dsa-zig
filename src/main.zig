@@ -6,7 +6,6 @@ const testing = std.testing;
 const assert = std.debug.assert;
 
 const Stack = dsa.Stack;
-const Graph = dsa.Graph;
 
 pub fn main() !void {
     print("hello world\n", .{});

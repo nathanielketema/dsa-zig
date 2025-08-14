@@ -3,4 +3,3 @@ const assert = std.debug.assert;
 const testing = std.testing;
 
 pub const Stack = @import("stack").Stack;
-pub const Graph = @import("graph").Graph;
