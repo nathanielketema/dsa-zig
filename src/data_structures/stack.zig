@@ -3,12 +3,6 @@ const assert = std.debug.assert;
 const Allocator = std.mem.Allocator;
 
 pub fn Stack(comptime T: type) type {
-    // You can pick any of the implementations below to expose for the caller
-    return StackLinkedList(T);
-    //return StackList(T);
-}
-
-pub fn StackLinkedList(comptime T: type) type {
     const Node = struct {
         const Self = @This();
         value: T,
