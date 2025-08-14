@@ -17,9 +17,7 @@ pub fn StackLinkedList(comptime T: type) type {
 
     return struct {
         head: ?*Node,
-        /// Number of T items that can be stored
         capacity: u32,
-        /// Number of T items that are currently stored
         count: u32,
         allocator: Allocator,
 
@@ -51,7 +49,10 @@ pub fn StackLinkedList(comptime T: type) type {
             assert(self.count < self.capacity);
 
             const new_node = try self.allocator.create(Node);
-            new_node.* = Node{ .value = value, .next = null };
+            new_node.* = Node{
+                .value = value,
+                .next = null,
+            };
 
             new_node.next = self.head;
             self.head = new_node;
@@ -100,23 +101,67 @@ pub fn StackLinkedList(comptime T: type) type {
                 \\head 
                 \\ |
                 \\ v
+                \\
             , .{});
             var current_node = self.head;
             while (current_node) |node| {
                 current_node = node.next;
-                std.debug.print("{d} -> \n", .{node.value});
+                std.debug.print(" {d} -> ", .{node.value});
             }
-            std.debug.print("null", .{});
+            std.debug.print("null\n\n", .{});
         }
     };
 }
 
-    // Todo:
-    //   - init
-    //   - push
-    //   - pop
-    //   - peek (returns head)
-    //   - empty
-    //   - contains
+const testing = std.testing;
 
+test "test 1" {
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
+    const allocator = gpa.allocator();
+
+    var stack = Stack(u8).init(allocator, 10);
+    defer stack.deinit();
+
+    try testing.expect(stack.capacity == 10);
+    try testing.expect(stack.count == 0);
+    try testing.expect(stack.empty());
+    try testing.expect(stack.pop() == null);
+    try testing.expect(stack.peek() == null);
+
+    try stack.push(1);
+    try stack.push(2);
+    try stack.push(3);
+    try stack.push(4);
+    try stack.push(5);
+    try stack.push(6);
+
+    stack.print();
+
+    try testing.expect(stack.count == 6);
+    try testing.expect(stack.contains(6));
+    try testing.expectEqual(stack.peek().?, 6);
+
+    try testing.expectEqual(stack.pop().?, 6);
+    try testing.expectEqual(stack.pop().?, 5);
+
+    try testing.expectEqual(stack.peek().?, 4);
+    try testing.expect(stack.count == 4);
+
+    try testing.expect(stack.contains(4));
+    try testing.expect(!stack.contains(6));
+    try testing.expect(!stack.empty());
+
+    stack.print();
+
+    try stack.push(5);
+    try stack.push(6);
+    try stack.push(7);
+    try stack.push(8);
+    try stack.push(9);
+    try stack.push(10);
+
+    try testing.expect(stack.count == stack.capacity);
+
+    stack.print();
 }
