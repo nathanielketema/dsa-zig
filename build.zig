@@ -4,24 +4,20 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const lib_mod = b.createModule(.{
+    const dsa_mod = b.addModule("dsa", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    const exe_mod = b.createModule(.{
+    const exe = b.addExecutable(.{
+        .name = "dsa",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    exe_mod.addImport("dsa", lib_mod);
-
-    const exe = b.addExecutable(.{
-        .name = "dsa",
-        .root_module = exe_mod,
-    });
+    exe.root_module.addImport("dsa", dsa_mod);
 
     b.installArtifact(exe);
 
