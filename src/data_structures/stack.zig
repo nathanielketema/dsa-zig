@@ -80,6 +80,17 @@ pub fn StackLinkedList(comptime T: type) type {
             assert((self.count == 0) == (self.head == null));
             return self.head == null;
         }
+
+        pub fn contains(self: Self, needle: T) bool {
+            assert((self.count == 0) == (self.head == null));
+
+            var current_node = self.head;
+            while (current_node) |node| {
+                current_node = node.next;
+                if (node.value == needle) return true;
+            } else return false;
+        }
+
     };
 
     // Todo:
