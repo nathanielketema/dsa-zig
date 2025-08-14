@@ -71,6 +71,11 @@ pub fn StackLinkedList(comptime T: type) type {
             return value;
         }
 
+        pub fn peek(self: Self) ?T {
+            assert((self.count == 0) == (self.head == null));
+            return self.head.value orelse null;
+        }
+
     };
 
     // Todo:
