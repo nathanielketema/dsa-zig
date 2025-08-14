@@ -3,6 +3,8 @@ const assert = std.debug.assert;
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
+const StackError = error{FullStack};
+
 pub fn Stack(comptime T: type) type {
     const Node = struct {
         const Self = @This();
@@ -36,12 +38,16 @@ pub fn Stack(comptime T: type) type {
             }
         }
 
-        pub fn push(self: *Self, value: T) !void {
+        pub fn push(self: *Self, value: T) (StackError || anyerror)!void {
             // This is a smart way to ensure if:
             // - count == 0, then self.head must be null, and if
             // - count != 0, then self.head must not be null
             assert((self.count == 0) == (self.head == null));
-            assert(self.count < self.capacity);
+
+            if (!(self.count < self.capacity)) {
+                std.debug.print("Stack is full!\n", .{});
+                return StackError.FullStack;
+            }
 
             const new_node = try self.allocator.create(Node);
             new_node.* = Node{
