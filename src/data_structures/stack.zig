@@ -62,14 +62,12 @@ pub fn StackLinkedList(comptime T: type) type {
         pub fn pop(self: *Self) ?T {
             assert((self.count == 0) == (self.head == null));
 
-            // If the stack is empty return null
             const link = self.head orelse return null;
-            const value = link.value;
+            defer self.allocator.destroy(link);
 
             self.head = link.next;
             self.count -= 1;
-            self.allocator.destroy(link);
-            return value;
+            return link.value;
         }
 
         pub fn peek(self: Self) ?T {
