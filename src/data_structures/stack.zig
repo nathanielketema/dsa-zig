@@ -57,6 +57,20 @@ pub fn StackLinkedList(comptime T: type) type {
             self.head = new_node;
             self.count += 1;
         }
+
+        pub fn pop(self: *Self) ?T {
+            assert((self.count == 0) == (self.head == null));
+
+            // If the stack is empty return null
+            const link = self.head orelse return null;
+            const value = link.value;
+
+            self.head = link.next;
+            self.count -= 1;
+            self.allocator.destroy(link);
+            return value;
+        }
+
     };
 
     // Todo:
