@@ -25,6 +25,7 @@ pub fn StackLinkedList(comptime T: type) type {
 
         const Self = @This();
 
+        /// Caller must call deinit() to free up memory after use
         pub fn init(allocator: Allocator, capacity: u32) Self {
             return .{
                 .head = null,
@@ -32,6 +33,14 @@ pub fn StackLinkedList(comptime T: type) type {
                 .count = 0,
                 .allocator = allocator,
             };
+        }
+
+        pub fn deinit(self: *Self) void {
+            var current_node = self.head;
+            while (current_node) |node| {
+                current_node = node.next;
+                self.allocator.destroy(node);
+            }
         }
 
         pub fn push(self: *Self, value: T) !void {
@@ -42,10 +51,7 @@ pub fn StackLinkedList(comptime T: type) type {
             assert(self.count < self.capacity);
 
             const new_node = try self.allocator.create(Node);
-            new_node.* = Node{
-                .value = value,
-                .next = null
-            };
+            new_node.* = Node{ .value = value, .next = null };
 
             new_node.next = self.head;
             self.head = new_node;
