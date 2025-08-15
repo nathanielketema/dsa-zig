@@ -6,6 +6,7 @@ const testing = std.testing;
 const assert = std.debug.assert;
 
 const Stack = dsa.Stack;
+const Queue = dsa.Queue;
 
 pub fn main() !void {
     var gpa: std.heap.DebugAllocator(.{}) = .init;
@@ -22,5 +23,19 @@ pub fn main() !void {
     try stack.push(5);
     try stack.push(6);
 
+    print("Stack: \n", .{});
     stack.print();
+
+    var queue = Queue(u8).init(allocator, 10);
+    defer queue.deinit();
+
+    try queue.push(1);
+    try queue.push(2);
+    try queue.push(3);
+    try queue.push(4);
+    try queue.push(5);
+    try queue.push(6);
+
+    print("Queue: \n", .{});
+    queue.print();
 }
