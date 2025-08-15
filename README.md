@@ -11,7 +11,7 @@ To use these data structures and algorithms in your own codebase:
 1. Add this as a dependency in your `build.zig.zon` file:
 
 ```console
-zig fetch --save git+https://github.com/nathanielketema/dsa_zig.git
+zig fetch --save git+https://github.com/nathanielketema/dsa-zig.git
 ```
 
 2.  Next step is to add it to your `build.zig`:
