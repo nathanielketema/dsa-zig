@@ -6,20 +6,18 @@ const Allocator = std.mem.Allocator;
 const QueueError = error{QueueFull};
 
 pub fn Queue(comptime T: type) type {
-    const Node = struct {
-        const Self = @This();
-        value: T,
-        next: ?*Self,
-    };
-
     return struct {
+        const Self = @This();
+        const Node = struct {
+            value: T,
+            next: ?*Node,
+        };
+
         in: ?*Node,
         out: ?*Node,
         capacity: u32,
         count: u32,
         allocator: Allocator,
-
-        const Self = @This();
 
         /// Caller must call deinit() to free memory
         pub fn init(allocator: Allocator, capacity: u32) Self {

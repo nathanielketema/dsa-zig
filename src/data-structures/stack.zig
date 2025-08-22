@@ -6,19 +6,17 @@ const Allocator = std.mem.Allocator;
 const StackError = error{FullStack};
 
 pub fn Stack(comptime T: type) type {
-    const Node = struct {
-        const Self = @This();
-        value: T,
-        next: ?*Self,
-    };
-
     return struct {
+        const Self = @This();
+        const Node = struct {
+            value: T,
+            next: ?*Node,
+        };
+
         head: ?*Node,
         capacity: u32,
         count: u32,
         allocator: Allocator,
-
-        const Self = @This();
 
         /// Caller must call deinit() to free up memory after use
         pub fn init(allocator: Allocator, capacity: u32) Self {
