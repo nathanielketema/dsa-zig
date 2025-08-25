@@ -13,15 +13,29 @@ pub fn BinarySearchTree(comptime T: type) type {
         };
 
         root: ?*Node,
-        count: u32,
-        capacity: u32, // think about it, might have to remove
+        count: usize,
+        capacity: usize,
         allocator: Allocator,
 
-        pub fn init(allocator: Allocator, capacity: u32) Self {
+        // Todo:
+        // - add
+        // - remove
+        // - empty
+        // - search
+        // - height
+        // - preorder
+        // - inorder
+        // - postorder
+
+        /// Initialize your Binary Search Tree with an optional capacity
+        /// - If capacity is not provided, the default would set the capacity 
+        ///   to 100 T elements
+        /// Caller must also free memory by calling deinit()
+        pub fn init(allocator: Allocator, capacity: ?u32) Self {
             return .{
                 .root = null,
                 .count = 0,
-                .capacity = capacity,
+                .capacity = capacity orelse 100,
                 .allocator = allocator,
             };
         }
@@ -30,21 +44,9 @@ pub fn BinarySearchTree(comptime T: type) type {
             _ = self;
         }
 
-        pub fn inorder(self: Self) void {
-            assert((self.count == 0) == (self.root == null));
-
-            if (self.root) |root| {
-                self.inorder(root.left);
-                std.debug.print("{d}\n", .{root.value});
-                self.inorder(root.right);
-            } else {
-                return;
-            }
-        }
-
         pub fn empty(self: Self) bool {
             assert((self.count == 0) == (self.root == null));
-            return self.count == 0;
+            return self.root == null;
         }
     };
 }
