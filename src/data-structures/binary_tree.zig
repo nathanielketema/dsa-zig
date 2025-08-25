@@ -19,16 +19,30 @@ pub fn BinarySearchTree(comptime T: type) type {
 
         // Todo:
         // - add
+        //   - recursive
+        //   - iterative
         // - remove
+        //   - recursive
+        //   - iterative
         // - empty
         // - search
+        //   - recursive
+        //   - iterative
         // - height
+        //   - recursive
+        //   - iterative
         // - preorder
+        //   - recursive
+        //   - iterative
         // - inorder
+        //   - recursive
+        //   - iterative
         // - postorder
+        //   - recursive
+        //   - iterative
 
         /// Initialize your Binary Search Tree with an optional capacity
-        /// - If capacity is not provided, the default would set the capacity 
+        /// - If capacity is not provided, the default would set the capacity
         ///   to 100 T elements
         /// Caller must also free memory by calling deinit()
         pub fn init(allocator: Allocator, capacity: ?u32) Self {
