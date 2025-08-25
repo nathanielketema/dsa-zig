@@ -43,7 +43,6 @@ pub fn Stack(comptime T: type) type {
             assert((self.count == 0) == (self.head == null));
 
             if (!(self.count < self.capacity)) {
-                std.debug.print("Stack is full!\n", .{});
                 return StackError.FullStack;
             }
 
