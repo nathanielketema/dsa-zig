@@ -15,12 +15,12 @@ pub fn Queue(comptime T: type) type {
 
         in: ?*Node,
         out: ?*Node,
-        capacity: u32,
-        count: u32,
+        capacity: usize,
+        count: usize,
         allocator: Allocator,
 
         /// Caller must call deinit() to free memory
-        pub fn init(allocator: Allocator, capacity: u32) Self {
+        pub fn init(allocator: Allocator, capacity: usize) Self {
             return .{
                 .in = null,
                 .out = null,

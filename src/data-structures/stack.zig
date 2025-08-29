@@ -14,12 +14,12 @@ pub fn Stack(comptime T: type) type {
         };
 
         head: ?*Node,
-        capacity: u32,
-        count: u32,
+        capacity: usize,
+        count: usize,
         allocator: Allocator,
 
         /// Caller must call deinit() to free up memory after use
-        pub fn init(allocator: Allocator, capacity: u32) Self {
+        pub fn init(allocator: Allocator, capacity: usize) Self {
             return .{
                 .head = null,
                 .capacity = capacity,
