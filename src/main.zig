@@ -38,4 +38,11 @@ pub fn main() !void {
 
     print("Queue: \n", .{});
     queue.print();
+
+    var list = [_]u8{ 3, 1, 7, 4, 2 };
+    print("unsorted: {any}\n", .{list});
+
+    dsa.bubble_sort(u8, &list);
+
+    print("sorted: {any}\n", .{list});
 }
