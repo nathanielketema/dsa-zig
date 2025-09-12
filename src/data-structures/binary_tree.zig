@@ -180,3 +180,19 @@ pub fn BinarySearchTree(comptime T: type) type {
                 }
             }
         }
+
+        pub fn post_order_recursive(self: Self, list: *std.ArrayList(T)) !void {
+            try post_order_recursive_helper(self.allocator, self.root, list);
+        }
+
+        fn post_order_recursive_helper(
+            allocator: Allocator,
+            root: ?*Node,
+            list: *std.ArrayList(T),
+        ) !void {
+            if (root) |node| {
+                try post_order_recursive_helper(allocator, node.left, list);
+                try post_order_recursive_helper(allocator, node.right, list);
+                try list.append(allocator, node.value);
+            }
+        }
