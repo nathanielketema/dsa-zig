@@ -32,3 +32,29 @@ pub fn BinarySearchTree(comptime T: type) type {
                 .allocator = allocator,
             };
         }
+
+        pub fn add_recursive(self: *Self, value: T) !void {
+            assert((self.count == 0) == (self.root == null));
+
+            if (!(self.count < self.capacity)) {
+                return BinaryTreeError.FullTree;
+            }
+
+            self.root = try add_recursive_helper(self.allocator, self.root, value);
+            self.count += 1;
+        }
+
+        fn add_recursive_helper(allocator: Allocator, root: ?*Node, item: T) !?*Node {
+            if (root) |node| {
+                if (item < node.value) {
+                    node.left = try add_recursive_helper(allocator, node.left, item);
+                } else if (item > node.value) {
+                    node.right = try add_recursive_helper(allocator, node.right, item);
+                }
+                return node;
+            } else {
+                const new_node = try allocator.create(Node);
+                new_node.* = .{ .value = item };
+                return new_node;
+            }
+        }
