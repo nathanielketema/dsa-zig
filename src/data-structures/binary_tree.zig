@@ -100,3 +100,8 @@ pub fn BinarySearchTree(comptime T: type) type {
                 return;
             }
         }
+
+        pub fn empty(self: Self) bool {
+            assert((self.count == 0) == (self.root == null));
+            return self.root == null;
+        }
