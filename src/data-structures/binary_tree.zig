@@ -254,3 +254,25 @@ pub fn BinarySearchTree(comptime T: type) type {
                 }
             }
         }
+
+        pub fn search_recursive(self: *Self, needle: T) bool {
+            assert((self.count == 0) == (self.root == null));
+
+            return search_recursive_helper(self.root, needle);
+        }
+
+        fn search_recursive_helper(root: ?*Node, needle: T) bool {
+            if (root) |node| {
+                if (needle == node.value) {
+                    return true;
+                } else if (needle < node.value) {
+                    return search_recursive_helper(node.left, needle);
+                } else if (needle > node.value) {
+                    return search_recursive_helper(node.right, needle);
+                }
+            }
+
+            return false;
+        }
+    };
+}
