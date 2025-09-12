@@ -276,3 +276,95 @@ pub fn BinarySearchTree(comptime T: type) type {
         }
     };
 }
+
+test "binary search" {
+    var gpa: std.heap.ArenaAllocator = .init(std.testing.allocator);
+    defer gpa.deinit();
+    const allocator = gpa.allocator();
+
+    var binary_tree = BinarySearchTree(u8).init(allocator, null);
+    //defer binary_tree.deinit_recursive();
+    //defer binary_tree.deinit_iterative();
+
+    try testing.expect(binary_tree.empty());
+
+    try binary_tree.add_recursive(8);
+    try binary_tree.add_recursive(6);
+    try binary_tree.add_recursive(2);
+    try binary_tree.add_recursive(4);
+    try binary_tree.add_recursive(9);
+    try binary_tree.add_recursive(1);
+
+    try testing.expect(!binary_tree.empty());
+
+    try binary_tree.add_iterative(7);
+    try binary_tree.add_iterative(5);
+    try binary_tree.add_iterative(3);
+    try binary_tree.add_iterative(40);
+    try binary_tree.add_iterative(10);
+    try binary_tree.add_iterative(100);
+
+    // Searching
+    try testing.expect(binary_tree.search_recursive(40));
+    try testing.expect(binary_tree.search_recursive(100));
+    try testing.expect(!binary_tree.search_recursive(0));
+
+    // Tree traversal
+    var list = try std.ArrayList(u8).initCapacity(allocator, binary_tree.capacity);
+    defer list.deinit(allocator);
+
+    try binary_tree.pre_order_recursive(&list);
+    try testing.expectEqualSlices(
+        u8,
+        &[_]u8{ 8, 6, 2, 1, 4, 3, 5, 7, 9, 40, 10, 100 },
+        list.items,
+    );
+
+    list.clearRetainingCapacity();
+    try binary_tree.pre_order_iterative(&list);
+    try testing.expectEqualSlices(
+        u8,
+        &[_]u8{ 8, 6, 2, 1, 4, 3, 5, 7, 9, 40, 10, 100 },
+        list.items,
+    );
+
+    list.clearRetainingCapacity();
+    try binary_tree.in_order_recursive(&list);
+    try testing.expectEqualSlices(
+        u8,
+        &[_]u8{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 40, 100 },
+        list.items,
+    );
+
+    list.clearRetainingCapacity();
+    try binary_tree.in_order_iterative(&list);
+    try testing.expectEqualSlices(
+        u8,
+        &[_]u8{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 40, 100 },
+        list.items,
+    );
+
+    list.clearRetainingCapacity();
+    try binary_tree.post_order_recursive(&list);
+    try testing.expectEqualSlices(
+        u8,
+        &[_]u8{ 1, 3, 5, 4, 2, 7, 6, 10, 100, 40, 9, 8 },
+        list.items,
+    );
+
+    list.clearRetainingCapacity();
+    try binary_tree.post_order_iterative(&list);
+    try testing.expectEqualSlices(
+        u8,
+        &[_]u8{ 1, 3, 5, 4, 2, 7, 6, 10, 100, 40, 9, 8 },
+        list.items,
+    );
+
+    list.clearRetainingCapacity();
+    try binary_tree.post_order_iterative_better(&list);
+    try testing.expectEqualSlices(
+        u8,
+        &[_]u8{ 1, 3, 5, 4, 2, 7, 6, 10, 100, 40, 9, 8 },
+        list.items,
+    );
+}
