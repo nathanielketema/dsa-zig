@@ -121,3 +121,24 @@ pub fn BinarySearchTree(comptime T: type) type {
                 try pre_order_recursive_helper(allocator, node.right, list);
             }
         }
+
+        pub fn pre_order_iterative(self: Self, list: *std.ArrayList(T)) !void {
+            if (self.root) |_| {
+                var stack: Stack(?*Node) = .init(self.allocator, self.capacity);
+                defer stack.deinit();
+
+                try stack.push(self.root);
+
+                while (stack.pop()) |pop| {
+                    if (pop) |node| {
+                        try list.append(self.allocator, node.value);
+                        if (node.right) |right| {
+                            try stack.push(right);
+                        }
+                        if (node.left) |left| {
+                            try stack.push(left);
+                        }
+                    }
+                }
+            }
+        }
