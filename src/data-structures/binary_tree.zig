@@ -196,3 +196,61 @@ pub fn BinarySearchTree(comptime T: type) type {
                 try list.append(allocator, node.value);
             }
         }
+
+        pub fn post_order_iterative_better(self: Self, list: *std.ArrayList(T)) !void {
+            if (self.root) |_| {
+                var stack: Stack(*Node) = .init(self.allocator, self.capacity);
+                defer stack.deinit();
+
+                var current: ?*Node = self.root;
+                var last_visited: ?*Node = null;
+
+                while (current != null or !stack.empty()) {
+                    while (current) |curr| {
+                        try stack.push(curr);
+                        current = curr.left;
+                    }
+
+                    const top = stack.peek().?;
+
+                    if (top.right) |right| {
+                        if (last_visited != right) {
+                            current = right;
+                            continue;
+                        }
+                    }
+
+                    try list.append(self.allocator, top.value);
+                    last_visited = stack.pop();
+                }
+            }
+        }
+
+        pub fn post_order_iterative(self: Self, list: *std.ArrayList(T)) !void {
+            if (self.root) |root| {
+                var stack: Stack(*Node) = .init(self.allocator, self.capacity);
+                defer stack.deinit();
+
+                var visited: std.AutoHashMap(*Node, bool) = .init(self.allocator);
+                defer visited.deinit();
+
+                try stack.push(root);
+
+                while (!stack.empty()) {
+                    const current_node = stack.peek().?;
+
+                    if (visited.get(current_node)) |_| {
+                        try list.append(self.allocator, stack.pop().?.value);
+                        continue;
+                    }
+                    try visited.put(current_node, true);
+
+                    if (current_node.right) |right| {
+                        try stack.push(right);
+                    }
+                    if (current_node.left) |left| {
+                        try stack.push(left);
+                    }
+                }
+            }
+        }
