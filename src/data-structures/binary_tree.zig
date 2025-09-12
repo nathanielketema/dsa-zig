@@ -58,3 +58,45 @@ pub fn BinarySearchTree(comptime T: type) type {
                 return new_node;
             }
         }
+
+        pub fn add_iterative(self: *Self, item: T) !void {
+            const new_node = try self.allocator.create(Node);
+            new_node.* = .{ .value = item };
+
+            if (self.root) |root| {
+                var current = root;
+                while (true) {
+                    switch (std.math.order(item, current.value)) {
+                        .lt => {
+                            if (current.left) |left| {
+                                current = left;
+                            } else {
+                                current.left = new_node;
+                                self.count += 1;
+                                return;
+                            }
+                        },
+                        .gt => {
+                            if (current.right) |right| {
+                                current = right;
+                            } else {
+                                current.right = new_node;
+                                self.count += 1;
+                                return;
+                            }
+                        },
+                        .eq => {
+                            // Because this tree doesn't accept duplicates
+                            // - do nothing
+                            // - free new_node
+                            self.allocator.destroy(new_node);
+                            return;
+                        },
+                    }
+                }
+            } else {
+                self.root = new_node;
+                self.count += 1;
+                return;
+            }
+        }
