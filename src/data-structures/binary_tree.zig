@@ -105,3 +105,19 @@ pub fn BinarySearchTree(comptime T: type) type {
             assert((self.count == 0) == (self.root == null));
             return self.root == null;
         }
+
+        pub fn pre_order_recursive(self: Self, list: *std.ArrayList(T)) !void {
+            try pre_order_recursive_helper(self.allocator, self.root, list);
+        }
+
+        fn pre_order_recursive_helper(
+            allocator: Allocator,
+            root: ?*Node,
+            list: *std.ArrayList(T),
+        ) !void {
+            if (root) |node| {
+                try list.append(allocator, node.value);
+                try pre_order_recursive_helper(allocator, node.left, list);
+                try pre_order_recursive_helper(allocator, node.right, list);
+            }
+        }
