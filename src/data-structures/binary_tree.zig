@@ -142,3 +142,19 @@ pub fn BinarySearchTree(comptime T: type) type {
                 }
             }
         }
+
+        pub fn in_order_recursive(self: Self, list: *std.ArrayList(T)) !void {
+            try in_order_recursive_helper(self.allocator, self.root, list);
+        }
+
+        fn in_order_recursive_helper(
+            allocator: Allocator,
+            root: ?*Node,
+            list: *std.ArrayList(T),
+        ) !void {
+            if (root) |node| {
+                try in_order_recursive_helper(allocator, node.left, list);
+                try list.append(allocator, node.value);
+                try in_order_recursive_helper(allocator, node.right, list);
+            }
+        }
