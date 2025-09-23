@@ -274,6 +274,23 @@ pub fn BinarySearchTree(comptime T: type) type {
 
             return false;
         }
+
+        pub fn search_iterative(self: *Self, needle: T) bool {
+            assert((self.count == 0) == (self.root == null));
+
+            var current_node = self.root;
+            while (current_node) |node| {
+                if (needle == node.value) {
+                    return true;
+                } else if (needle < node.value) {
+                    current_node = node.left;
+                } else if (needle > node.value) {
+                    current_node = node.right;
+                }
+            }
+
+            return false;
+        }
     };
 }
 
