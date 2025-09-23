@@ -326,6 +326,10 @@ test "binary search" {
     try testing.expect(binary_tree.search_recursive(100));
     try testing.expect(!binary_tree.search_recursive(0));
 
+    try testing.expect(binary_tree.search_iterative(40));
+    try testing.expect(binary_tree.search_iterative(100));
+    try testing.expect(!binary_tree.search_iterative(0));
+
     // Tree traversal
     var list = try std.ArrayList(u8).initCapacity(allocator, binary_tree.capacity);
     defer list.deinit(allocator);
