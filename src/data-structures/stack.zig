@@ -130,8 +130,6 @@ test "test stack operations" {
     try stack.push(5);
     try stack.push(6);
 
-    stack.print();
-
     try testing.expect(stack.count == 6);
     try testing.expect(stack.contains(6));
     try testing.expectEqual(stack.peek().?, 6);
@@ -146,8 +144,6 @@ test "test stack operations" {
     try testing.expect(!stack.contains(6));
     try testing.expect(!stack.empty());
 
-    stack.print();
-
     try stack.push(5);
     try stack.push(6);
     try stack.push(7);
@@ -156,6 +152,4 @@ test "test stack operations" {
     try stack.push(10);
 
     try testing.expect(stack.count == stack.capacity);
-
-    stack.print();
 }

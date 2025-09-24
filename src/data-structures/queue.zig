@@ -156,8 +156,6 @@ test "test queue" {
     try queue.push(5);
     try queue.push(6);
 
-    queue.print();
-
     try testing.expect(queue.count == 6);
     try testing.expect(queue.contains(6));
     try testing.expectEqual(queue.peek(), 1);
@@ -175,8 +173,6 @@ test "test queue" {
     try testing.expect(queue.contains(6));
     try testing.expect(!queue.empty());
 
-    queue.print();
-
     try queue.push(5);
     try queue.push(6);
     try queue.push(7);
@@ -185,6 +181,4 @@ test "test queue" {
     try queue.push(10);
 
     try testing.expect(queue.count == queue.capacity);
-
-    queue.print();
 }
