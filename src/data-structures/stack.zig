@@ -7,16 +7,16 @@ const StackError = error{FullStack};
 
 pub fn Stack(comptime T: type) type {
     return struct {
+        head: ?*Node,
+        capacity: usize,
+        count: usize,
+        allocator: Allocator,
+
         const Self = @This();
         const Node = struct {
             value: T,
             next: ?*Node,
         };
-
-        head: ?*Node,
-        capacity: usize,
-        count: usize,
-        allocator: Allocator,
 
         /// Caller must call deinit() to free up memory after use
         pub fn init(allocator: Allocator, capacity: usize) Self {

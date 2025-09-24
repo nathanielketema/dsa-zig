@@ -8,6 +8,11 @@ const BinaryTreeError = error{FullTree};
 
 pub fn BinarySearchTree(comptime T: type) type {
     return struct {
+        root: ?*Node,
+        count: usize,
+        capacity: usize,
+        allocator: Allocator,
+
         const Self = @This();
         const Node = struct {
             left: ?*Node = null,
@@ -15,10 +20,13 @@ pub fn BinarySearchTree(comptime T: type) type {
             right: ?*Node = null,
         };
 
-        root: ?*Node,
-        count: usize,
-        capacity: usize,
-        allocator: Allocator,
+        // Todo:
+        // - remove
+        //   - recursive
+        //   - iterative
+        // - height
+        //   - recursive
+        //   - iterative
 
         /// Initialize your Binary Search Tree with an optional capacity
         /// - If capacity is not provided, the default would set the capacity
