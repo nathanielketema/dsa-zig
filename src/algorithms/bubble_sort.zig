@@ -3,7 +3,7 @@ const assert = std.debug.assert;
 const testing = std.testing;
 
 pub fn bubble_sort(comptime T: type, items: []T) void {
-    if (items.len <= 0) return;
+    if (items.len == 0) return;
     var swapped: bool = undefined;
     for (0..items.len - 1) |i| {
         swapped = false;
@@ -26,12 +26,12 @@ test "test" {
 
     try testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 3, 4, 5 }, &array);
 
-    var list = [_]u8{ 'n', 'a', 't', 'h', 'a', 'n', 'i', 'e', 'l' };
+    var list = [_]u8{ 'p', 'o', 't', 'a', 't', 'o' };
     bubble_sort(u8, &list);
 
     try testing.expectEqualSlices(
         u8,
-        &[_]u8{ 'a', 'a', 'e', 'h', 'i', 'l', 'n', 'n', 't' },
+        &[_]u8{ 'a', 'o', 'o', 'p', 't', 't' },
         &list,
     );
 }

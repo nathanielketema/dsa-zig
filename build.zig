@@ -45,7 +45,7 @@ pub fn build(b: *std.Build) void {
 
     const exe_bst = b.addTest(.{
         .root_module = b.createModule(.{
-            .root_source_file = b.path("src/data-structures/binary_tree.zig"),
+            .root_source_file = b.path("src/data-structures/binary_search_tree.zig"),
             .target = target,
             .optimize = optimize,
         })
