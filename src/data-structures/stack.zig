@@ -7,12 +7,13 @@ const StackError = error{FullStack};
 
 pub fn Stack(comptime T: type) type {
     return struct {
+        allocator: Allocator,
         head: ?*Node,
         capacity: usize,
         count: usize,
-        allocator: Allocator,
 
         const Self = @This();
+
         const Node = struct {
             value: T,
             next: ?*Node,
@@ -21,10 +22,10 @@ pub fn Stack(comptime T: type) type {
         /// Caller must call deinit() to free up memory after use
         pub fn init(allocator: Allocator, capacity: usize) Self {
             return .{
+                .allocator = allocator,
                 .head = null,
                 .capacity = capacity,
                 .count = 0,
-                .allocator = allocator,
             };
         }
 
@@ -84,8 +85,7 @@ pub fn Stack(comptime T: type) type {
             assert((self.count == 0) == (self.head == null));
 
             var current_node = self.head;
-            while (current_node) |node| {
-                current_node = node.next;
+            while (current_node) |node| : (current_node = node.next){
                 if (node.value == needle) return true;
             } else return false;
         }

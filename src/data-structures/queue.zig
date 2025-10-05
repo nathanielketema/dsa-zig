@@ -7,13 +7,14 @@ const QueueError = error{QueueFull};
 
 pub fn Queue(comptime T: type) type {
     return struct {
+        allocator: Allocator,
         in: ?*Node,
         out: ?*Node,
         capacity: usize,
         count: usize,
-        allocator: Allocator,
 
         const Self = @This();
+
         const Node = struct {
             value: T,
             next: ?*Node,
@@ -22,11 +23,11 @@ pub fn Queue(comptime T: type) type {
         /// Caller must call deinit() to free memory
         pub fn init(allocator: Allocator, capacity: usize) Self {
             return .{
+                .allocator = allocator,
                 .in = null,
                 .out = null,
                 .capacity = capacity,
                 .count = 0,
-                .allocator = allocator,
             };
         }
 
