@@ -109,8 +109,9 @@ pub fn Queue(comptime T: type) type {
             var current_node = self.out;
             while (current_node) |node| {
                 current_node = node.next;
-                if (node.value == needle) return true;
-            } else return false;
+                if (std.meta.eql(needle, node.value)) return true;
+            } 
+            return false;
         }
 
         pub fn print(self: Self) void {
