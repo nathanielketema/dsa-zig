@@ -87,7 +87,9 @@ pub fn Stack(comptime T: type) type {
 
             var current_node = self.head;
             while (current_node) |node| : (current_node = node.next){
-                if (std.meta.eql(needle, node.value)) return true;
+                if (std.meta.eql(needle, node.value)) {
+                    return true;
+                }
             } 
             return false;
         }

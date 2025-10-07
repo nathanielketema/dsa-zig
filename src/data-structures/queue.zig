@@ -94,8 +94,8 @@ pub fn Queue(comptime T: type) type {
         }
 
         pub fn peek_last(self: Self) ?*const T {
-            assert((self.count == 0) == (self.in == null) and
-                (self.in == null) == (self.out == null));
+            assert((self.count == 0) == (self.in == null));
+            assert((self.count == 0) == (self.out == null));
 
             if (self.in) |in| {
                 return &in.value;
@@ -104,14 +104,14 @@ pub fn Queue(comptime T: type) type {
         }
 
         pub fn empty(self: Self) bool {
-            assert((self.count == 0) == (self.in == null) and
-                (self.in == null) == (self.out == null));
+            assert((self.count == 0) == (self.in == null));
+            assert((self.count == 0) == (self.out == null));
             return self.count == 0;
         }
 
         pub fn contains(self: Self, needle: T) bool {
-            assert((self.count == 0) == (self.in == null) and
-                (self.in == null) == (self.out == null));
+            assert((self.count == 0) == (self.in == null));
+            assert((self.count == 0) == (self.out == null));
 
             var current_node = self.out;
             while (current_node) |node| : (current_node = node.next) {
