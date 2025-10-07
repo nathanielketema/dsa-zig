@@ -55,6 +55,7 @@ pub fn Stack(comptime T: type) type {
 
             self.head = new_node;
             self.count += 1;
+            assert(self.count <= self.capacity);
         }
 
         pub fn pop(self: *Self) ?T {
