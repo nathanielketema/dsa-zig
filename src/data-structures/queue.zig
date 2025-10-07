@@ -41,8 +41,8 @@ pub fn Queue(comptime T: type) type {
 
         pub fn push(self: *Self, value: T) !void {
             // An if and only if condtion for three elements
-            assert((self.count == 0) == (self.in == null) and
-                (self.in == null) == (self.out == null));
+            assert((self.count == 0) == (self.in == null));
+            assert((self.count == 0) == (self.out == null));
 
             if (self.count >= self.capacity) {
                 return QueueError.QueueFull;
@@ -54,9 +54,9 @@ pub fn Queue(comptime T: type) type {
                 .next = null,
             };
 
-            if (self.in) |*in| {
-                in.*.next = new_node;
-                in.* = new_node;
+            if (self.in) |in_node| {
+                in_node.next = new_node;
+                self.in = new_node;
             } else {
                 self.in = new_node;
                 self.out = new_node;
@@ -67,21 +67,20 @@ pub fn Queue(comptime T: type) type {
         }
 
         pub fn pop(self: *Self) ?T {
-            assert((self.count == 0) == (self.in == null) and
-                (self.in == null) == (self.out == null));
+            assert((self.count == 0) == (self.in == null));
+            assert((self.count == 0) == (self.out == null));
 
             const link = self.out orelse return null;
             defer self.allocator.destroy(link);
-            const value = link.value;
 
             self.out = link.next;
             self.count -= 1;
-            return value;
+            return link.value;
         }
 
         pub fn peek(self: Self) ?*const T {
-            assert((self.count == 0) == (self.in == null) and
-                (self.in == null) == (self.out == null));
+            assert((self.count == 0) == (self.in == null));
+            assert((self.count == 0) == (self.out == null));
 
             if (self.out) |out| {
                 return &out.value;
@@ -89,13 +88,14 @@ pub fn Queue(comptime T: type) type {
             return null;
         }
 
-        pub fn peek_last(self: Self) ?T {
+        pub fn peek_last(self: Self) ?*const T {
             assert((self.count == 0) == (self.in == null) and
                 (self.in == null) == (self.out == null));
 
             if (self.in) |in| {
-                return in.value;
-            } else return null;
+                return &in.value;
+            } 
+            return null;
         }
 
         pub fn empty(self: Self) bool {
@@ -123,7 +123,7 @@ test "test queue" {
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
-    var queue = Queue(u8).init(allocator, 10);
+    var queue: Queue(u8) = .init(allocator, 10);
     defer queue.deinit();
 
     try testing.expect(queue.capacity == 10);
@@ -135,6 +135,8 @@ test "test queue" {
 
     try queue.push(1);
     try queue.push(2);
+    try testing.expect(queue.in.?.value == 2);
+
     try queue.push(3);
     try queue.push(4);
     try queue.push(5);
@@ -142,14 +144,14 @@ test "test queue" {
 
     try testing.expect(queue.count == 6);
     try testing.expect(queue.contains(6));
-    try testing.expectEqual(queue.peek(), 1);
-    try testing.expectEqual(queue.peek_last().?, 6);
+    try testing.expectEqual(queue.peek().?.*, 1);
+    try testing.expectEqual(queue.peek_last().?.*, 6);
 
     try testing.expectEqual(queue.pop().?, 1);
     try testing.expectEqual(queue.pop().?, 2);
 
-    try testing.expectEqual(queue.peek().?, 3);
-    try testing.expectEqual(queue.peek_last().?, 6);
+    try testing.expectEqual(queue.peek().?.*, 3);
+    try testing.expectEqual(queue.peek_last().?.*, 6);
     try testing.expect(queue.count == 4);
 
     try testing.expect(!queue.contains(1));
