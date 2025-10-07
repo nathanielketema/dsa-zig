@@ -78,13 +78,14 @@ pub fn Queue(comptime T: type) type {
             return value;
         }
 
-        pub fn peek(self: Self) ?T {
+        pub fn peek(self: Self) ?*const T {
             assert((self.count == 0) == (self.in == null) and
                 (self.in == null) == (self.out == null));
 
             if (self.out) |out| {
-                return out.value;
-            } else return null;
+                return &out.value;
+            } 
+            return null;
         }
 
         pub fn peek_last(self: Self) ?T {

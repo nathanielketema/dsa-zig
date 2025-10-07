@@ -68,11 +68,12 @@ pub fn Stack(comptime T: type) type {
             return link.value;
         }
 
-        pub fn peek(self: Self) ?T {
+        pub fn peek(self: Self) ?*const T {
             assert((self.count == 0) == (self.head == null));
             if (self.head) |head| {
-                return head.value;
-            } else return null;
+                return &head.value;
+            } 
+            return null;
         }
 
         pub fn empty(self: Self) bool {
