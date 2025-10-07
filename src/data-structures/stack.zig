@@ -78,7 +78,7 @@ pub fn Stack(comptime T: type) type {
 
         pub fn empty(self: Self) bool {
             assert((self.count == 0) == (self.head == null));
-            return self.count == null;
+            return self.count == 0;
         }
 
         pub fn contains(self: Self, needle: T) bool {
@@ -136,4 +136,28 @@ test "test stack operations" {
     try stack.push(10);
 
     try testing.expect(stack.count == stack.capacity);
+}
+
+test "push beyond capacity" {
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
+    const allocator = gpa.allocator();
+
+    var stack: Stack(u8) = .init(allocator, 2);
+    defer stack.deinit();
+
+    try stack.push(1);
+    try stack.push(2);
+    try testing.expectError(StackError.FullStack, stack.push(3));
+}
+
+test "capacity zero stack" {
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
+    const allocator = gpa.allocator();
+
+    var stack: Stack(u8) = .init(allocator, 0);
+    defer stack.deinit();
+
+    try testing.expectError(StackError.FullStack, stack.push(1));
 }
