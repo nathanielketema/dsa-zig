@@ -99,7 +99,7 @@ test "test stack operations" {
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
-    var stack = Stack(u8).init(allocator, 10);
+    var stack: Stack(u8) = .init(allocator, 10);
     defer stack.deinit();
 
     try testing.expect(stack.capacity == 10);
