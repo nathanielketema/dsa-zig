@@ -43,7 +43,7 @@ pub fn Stack(comptime T: type) type {
             // - count != 0, then self.head must not be null
             assert((self.count == 0) == (self.head == null));
 
-            if (!(self.count < self.capacity)) {
+            if (self.count >= self.capacity) {
                 return StackError.FullStack;
             }
 

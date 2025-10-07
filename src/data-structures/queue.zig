@@ -44,7 +44,7 @@ pub fn Queue(comptime T: type) type {
             assert((self.count == 0) == (self.in == null) and
                 (self.in == null) == (self.out == null));
 
-            if (!(self.count < self.capacity)) {
+            if (self.count >= self.capacity) {
                 return QueueError.QueueFull;
             }
 
