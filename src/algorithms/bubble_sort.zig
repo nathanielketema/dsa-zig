@@ -36,16 +36,40 @@ test "test" {
     );
 }
 
-test "fuzzing" {
-    var random = std.Random.DefaultPrng.init(23);
-    var input: [1_000]u32 = undefined;
-    _ = &input;
-    for (0..input.len) |i| {
-        input[i] = random.random().uintAtMost(u32, 1_000);
-    }
+test "edge cases" {
+    var empty: [0]u8 = .{};
+    bubble_sort(u8, &empty);
+    
+    var single = [_]u8{42};
+    bubble_sort(u8, &single);
+    try testing.expectEqual(42, single[0]);
+    
+    var sorted = [_]u8{1, 2, 3, 4, 5};
+    bubble_sort(u8, &sorted);
+    try testing.expectEqualSlices(u8, &[_]u8{1, 2, 3, 4, 5}, &sorted);
+    
+    var reverse = [_]u8{5, 4, 3, 2, 1};
+    bubble_sort(u8, &reverse);
+    try testing.expectEqualSlices(u8, &[_]u8{1, 2, 3, 4, 5}, &reverse);
+    
+    var dupes = [_]u8{3, 1, 3, 2, 1};
+    bubble_sort(u8, &dupes);
+    try testing.expectEqualSlices(u8, &[_]u8{1, 1, 2, 3, 3}, &dupes);
+}
 
-    bubble_sort(u32, &input);
-    for (0..input.len - 1) |i| {
-        try testing.expect(input[i] <= input[i + 1]);
+test "fuzzing multiple seeds" {
+    for (0..10) |seed| {
+        var random = std.Random.DefaultPrng.init(seed);
+        var input: [100]u32 = undefined;
+        
+        for (0..input.len) |i| {
+            input[i] = random.random().uintAtMost(u32, 1_000);
+        }
+        
+        bubble_sort(u32, &input);
+        
+        for (0..input.len - 1) |i| {
+            try testing.expect(input[i] <= input[i + 1]);
+        }
     }
 }

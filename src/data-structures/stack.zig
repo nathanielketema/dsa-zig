@@ -3,7 +3,7 @@ const assert = std.debug.assert;
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
-const StackError = error{FullStack};
+pub const StackError = error{FullStack};
 
 pub fn Stack(comptime T: type) type {
     return struct {
