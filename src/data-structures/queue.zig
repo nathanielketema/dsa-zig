@@ -39,7 +39,7 @@ pub fn Queue(comptime T: type) type {
             }
         }
 
-        pub fn push(self: *Self, value: T) !void {
+        pub fn push(self: *Self, value: T) (QueueError || Allocator.Error)!void {
             // An if and only if condtion for three elements
             assert((self.count == 0) == (self.in == null));
             assert((self.count == 0) == (self.out == null));
@@ -75,6 +75,11 @@ pub fn Queue(comptime T: type) type {
 
             self.out = link.next;
             self.count -= 1;
+
+            if (self.count == 0) {
+                self.in = null;
+            }
+
             return link.value;
         }
 
@@ -109,8 +114,7 @@ pub fn Queue(comptime T: type) type {
                 (self.in == null) == (self.out == null));
 
             var current_node = self.out;
-            while (current_node) |node| {
-                current_node = node.next;
+            while (current_node) |node| : (current_node = node.next) {
                 if (std.meta.eql(needle, node.value)) return true;
             } 
             return false;
@@ -167,4 +171,40 @@ test "test queue" {
     try queue.push(10);
 
     try testing.expect(queue.count == queue.capacity);
+}
+
+test "push beyond capacity" {
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
+    const allocator = gpa.allocator();
+
+    var queue: Queue(u8) = .init(allocator, 2);
+    defer queue.deinit();
+
+    try queue.push(1);
+    try queue.push(2);
+    try testing.expectError(QueueError.QueueFull, queue.push(3));
+}
+
+test "empty then refill" {
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
+    const allocator = gpa.allocator();
+
+    var queue: Queue(u8) = .init(allocator, 5);
+    defer queue.deinit();
+
+    try queue.push(1);
+    try queue.push(2);
+    
+    _ = queue.pop();
+    _ = queue.pop();
+    
+    try testing.expect(queue.empty());
+    try testing.expect(queue.in == null);
+    try testing.expect(queue.out == null);
+    
+    // Should work fine after emptying
+    try queue.push(3);
+    try testing.expectEqual(queue.peek().?.*, 3);
 }
