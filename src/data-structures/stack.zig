@@ -116,12 +116,12 @@ test "test stack operations" {
 
     try testing.expect(stack.count == 6);
     try testing.expect(stack.contains(6));
-    try testing.expectEqual(stack.peek().?, 6);
+    try testing.expectEqual(stack.peek().?.*, 6);
 
     try testing.expectEqual(stack.pop().?, 6);
     try testing.expectEqual(stack.pop().?, 5);
 
-    try testing.expectEqual(stack.peek().?, 4);
+    try testing.expectEqual(stack.peek().?.*, 4);
     try testing.expect(stack.count == 4);
 
     try testing.expect(stack.contains(4));
