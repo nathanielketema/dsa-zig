@@ -37,7 +37,7 @@ pub fn Stack(comptime T: type) type {
             }
         }
 
-        pub fn push(self: *Self, value: T) (StackError || anyerror)!void {
+        pub fn push(self: *Self, value: T) (StackError || Allocator.Error)!void {
             // This is a smart way to ensure if:
             // - count == 0, then self.head must be null, and if
             // - count != 0, then self.head must not be null
@@ -78,7 +78,7 @@ pub fn Stack(comptime T: type) type {
 
         pub fn empty(self: Self) bool {
             assert((self.count == 0) == (self.head == null));
-            return self.head == null;
+            return self.count == null;
         }
 
         pub fn contains(self: Self, needle: T) bool {
