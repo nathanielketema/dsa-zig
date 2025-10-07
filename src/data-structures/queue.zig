@@ -114,26 +114,6 @@ pub fn Queue(comptime T: type) type {
             } 
             return false;
         }
-
-        pub fn print(self: Self) void {
-            assert((self.count == 0) == (self.in == null) and
-                (self.in == null) == (self.out == null));
-
-            std.debug.print(
-                \\out
-                \\ | 
-                \\ v
-                \\
-            , .{});
-
-            var current_node = self.out;
-            while (current_node) |node| {
-                current_node = node.next;
-                std.debug.print(" {d} -> ", .{node.value});
-            }
-
-            std.debug.print("null <- in\n\n", .{});
-        }
     };
 }
 

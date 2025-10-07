@@ -90,23 +90,6 @@ pub fn Stack(comptime T: type) type {
             } 
             return false;
         }
-
-        pub fn print(self: Self) void {
-            assert((self.count == 0) == (self.head == null));
-
-            std.debug.print(
-                \\head 
-                \\ |
-                \\ v
-                \\
-            , .{});
-            var current_node = self.head;
-            while (current_node) |node| {
-                current_node = node.next;
-                std.debug.print(" {d} -> ", .{node.value});
-            }
-            std.debug.print("null\n\n", .{});
-        }
     };
 }
 
