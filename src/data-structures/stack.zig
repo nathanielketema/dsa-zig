@@ -50,10 +50,9 @@ pub fn Stack(comptime T: type) type {
             const new_node = try self.allocator.create(Node);
             new_node.* = Node{
                 .value = value,
-                .next = null,
+                .next = self.head,
             };
 
-            new_node.next = self.head;
             self.head = new_node;
             self.count += 1;
         }
@@ -87,7 +86,8 @@ pub fn Stack(comptime T: type) type {
             var current_node = self.head;
             while (current_node) |node| : (current_node = node.next){
                 if (std.meta.eql(needle, node.value)) return true;
-            } else return false;
+            } 
+            return false;
         }
 
         pub fn print(self: Self) void {
