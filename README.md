@@ -25,7 +25,7 @@ const dsa = b.dependency("dsa_zig", .{
 exe.root_module.addImport("dsa", dsa.module("dsa"));
 ```
 
-3. Finally, you can use it like this:
+3. Finally, you can use it by importing it to your code base:
 
 ```zig
 const dsa = @import("dsa");
@@ -46,7 +46,7 @@ pub fn main() !void {
     const allocator = gpa.allocator();
 
     // Stack takes anytype and is initialized with
-    // and allocator and a capacity
+    // an allocator and a capacity
     var stack = Stack(u8).init(allocator, 10);
     defer stack.deinit();
 
