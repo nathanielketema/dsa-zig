@@ -70,7 +70,37 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             allocator.destroy(node);
         }
 
-        // Todo: fn deinit_iterative()
+        pub fn deinit_iterative(self: *Self) void {
+            if (self.root) |root| {
+                var stack = Stack(*Node).init(self.allocator, self.count);
+                defer stack.deinit();
+
+                var visited = std.AutoHashMap(*Node, void).init(self.allocator);
+                defer visited.deinit();
+
+                stack.push(root) catch unreachable;
+
+                while (!stack.empty()) {
+                    const current = stack.peek().?.*;
+
+                    if (visited.contains(current)) {
+                        _ = stack.pop();
+                        self.allocator.destroy(current);
+                        continue;
+                    }
+
+                    visited.put(current, {}) catch unreachable;
+
+                    if (current.right) |right| {
+                        stack.push(right) catch unreachable;
+                    }
+                    if (current.left) |left| {
+                        stack.push(left) catch unreachable;
+                    }
+                }
+            }
+            self.* = undefined;
+        }
 
         /// Returns true if empty
         pub fn empty(self: Self) bool {
@@ -365,7 +395,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
 }
 
 test "binary search tree (linked list) operations: recursive" {
-    var gpa: std.heap.DebugAllocator(.{}) = .{};
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
@@ -411,11 +441,12 @@ test "binary search tree (linked list) operations: recursive" {
 }
 
 test "binary search tree (linked lists) traversals: recursive" {
-    var gpa: std.heap.ArenaAllocator = .init(std.testing.allocator);
-    defer gpa.deinit();
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
     var bst: BinarySearchTreeWithImplementation(u8, .linked_list) = .init(allocator);
+    defer bst.deinit_recursive();
 
     try bst.add_recursive(8);
     try bst.add_recursive(6);
@@ -458,11 +489,12 @@ test "binary search tree (linked lists) traversals: recursive" {
 }
 
 test "binary search tree (linked lists) traversals: iterative" {
-    var gpa: std.heap.ArenaAllocator = .init(std.testing.allocator);
-    defer gpa.deinit();
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
     var bst: BinarySearchTreeWithImplementation(u8, .linked_list) = .init(allocator);
+    defer bst.deinit_iterative();
 
     try bst.add_iterative(8);
     try bst.add_iterative(6);
