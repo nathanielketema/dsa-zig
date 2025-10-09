@@ -74,7 +74,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
 
         /// Returns true if empty
         pub fn empty(self: Self) bool {
-            assert((self.count == 0) == (self.root == null));
             return self.count == 0;
         }
 
@@ -201,7 +200,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         // Todo: remove_iterative()
 
         pub fn pre_order_recursive(self: Self, list: *std.ArrayList(T)) !void {
-            assert((self.count == 0) == (self.root == null));
             try pre_order_recursive_helper(self.allocator, self.root, list);
         }
 
@@ -218,7 +216,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn pre_order_iterative(self: Self, list: *std.ArrayList(T)) !void {
-            assert((self.count == 0) == (self.root == null));
             var stack: Stack(?*Node) = .init(self.allocator, self.count);
             defer stack.deinit();
 
@@ -238,7 +235,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn in_order_recursive(self: Self, list: *std.ArrayList(T)) !void {
-            assert((self.count == 0) == (self.root == null));
             try in_order_recursive_helper(self.allocator, self.root, list);
         }
 
@@ -255,7 +251,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn in_order_iterative(self: Self, list: *std.ArrayList(T)) !void {
-            assert((self.count == 0) == (self.root == null));
             var stack: Stack(?*Node) = .init(self.allocator, self.count);
             defer stack.deinit();
 
@@ -276,7 +271,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn post_order_recursive(self: Self, list: *std.ArrayList(T)) !void {
-            assert((self.count == 0) == (self.root == null));
             try post_order_recursive_helper(self.allocator, self.root, list);
         }
 
@@ -293,7 +287,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn post_order_iterative(self: Self, list: *std.ArrayList(T)) !void {
-            assert((self.count == 0) == (self.root == null));
             if (self.root) |root| {
                 var stack: Stack(*Node) = .init(self.allocator, self.count);
                 defer stack.deinit();
@@ -321,7 +314,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             }
         }
 
-        pub fn search_recursive(self: *Self, needle: T) bool {
+        pub fn search_recursive(self: Self, needle: T) bool {
             assert((self.count == 0) == (self.root == null));
             return search_recursive_helper(self.root, needle);
         }
@@ -340,9 +333,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             }
         }
 
-        pub fn search_iterative(self: *Self, needle: T) bool {
-            assert((self.count == 0) == (self.root == null));
-
+        pub fn search_iterative(self: Self, needle: T) bool {
             var current_node = self.root;
             while (current_node) |node| {
                 if (needle == node.value) {
@@ -358,7 +349,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn height_recursive(self: Self) usize {
-            assert((self.count == 0) == (self.root == null));
             return height_recursive_helper(self.root);
         }
 
