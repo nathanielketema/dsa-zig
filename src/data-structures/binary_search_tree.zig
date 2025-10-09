@@ -229,7 +229,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
 
         pub fn remove_iterative(self: *Self, value: T) !void {
             assert((self.count == 0) == (self.root == null));
-
             const root = self.root orelse return BinarySearchTreeError.ValueNotFound;
 
             const ChildSide = enum {
@@ -253,10 +252,11 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             });
 
             var target: ?Context = null;
-            while (stack.pop()) |item| {
+            while (!stack.empty()) {
+                const item = stack.pop().?;
+
                 if (value == item.node.value) {
                     target = item;
-                    break;
                 } else if (value < item.node.value) {
                     if (item.node.left) |left| {
                         try stack.push(.{
@@ -277,8 +277,8 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             }
 
             const found = target orelse return BinarySearchTreeError.ValueNotFound;
-
             const node = found.node;
+
             if (node.left == null and node.right == null) {
                 if (found.parent) |parent| {
                     switch (found.side.?) {
@@ -616,6 +616,60 @@ test "binary search tree (linked list) operations: iterative" {
 
     try testing.expect(bst.search_iterative(8));
     try bst.remove_iterative(8);
+}
+
+test "swarm testing recursive against iterative approach" {
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer assert(gpa.deinit() == .ok);
+    const allocator = gpa.allocator();
+
+    var bst_iterative: BinarySearchTreeWithImplementation(u8, .linked_list) = .init(allocator);
+    defer bst_iterative.deinit_iterative();
+
+    var bst_recursive: BinarySearchTreeWithImplementation(u8, .linked_list) = .init(allocator);
+    defer bst_recursive.deinit_recursive();
+
+    const N = 1_000;
+    var prng = std.Random.DefaultPrng.init(std.testing.random_seed);
+    const random = prng.random();
+
+    const Operation = enum {
+        add,
+        remove,
+        search,
+    };
+
+    for (0..N) |_| {
+        const operation = random.enumValue(Operation);
+        const value = random.int(u8);
+
+        switch (operation) {
+            .add => {
+                try bst_recursive.add_recursive(value);
+                try bst_iterative.add_iterative(value);
+
+                try testing.expectEqual(bst_iterative.count, bst_recursive.count);
+            },
+            .remove => {
+                const result_recursive = bst_recursive.remove_recursive(value);
+                const result_iterative = bst_iterative.remove_iterative(value);
+
+                if (result_recursive) {
+                    try result_iterative;
+                } else |err| {
+                    try testing.expectError(err, result_iterative);
+                }
+
+                try testing.expectEqual(bst_iterative.count, bst_recursive.count);
+            },
+            .search => {
+                const found_recursive = bst_recursive.search_recursive(value);
+                const found_iterative = bst_iterative.search_iterative(value);
+
+                try testing.expectEqual(found_recursive, found_iterative);
+            },
+        }
+    }
 }
 
 test "binary search tree (linked lists) traversals: recursive" {
