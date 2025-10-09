@@ -390,7 +390,45 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             );
         }
 
-        // Todo: height_iterative()
+        pub fn height_iterative(self: Self) usize {
+            assert((self.count == 0) == (self.root == null));
+
+            const root = self.root orelse return 0;
+
+            const NodeWithDepth = struct {
+                node: *Node,
+                depth: usize,
+            };
+
+            var stack = Stack(NodeWithDepth).init(self.allocator, self.count);
+            defer stack.deinit();
+
+            stack.push(.{
+                .node = root,
+                .depth = 1,
+            }) catch unreachable;
+
+            var max_height = 0;
+            while (stack.pop()) |item| {
+                max_height = @max(max_height, item.depth);
+
+                if (item.node.right) |right| {
+                    stack.push(.{
+                        .node = right,
+                        .depth = item.depth + 1,
+                    }) catch unreachable;
+                }
+
+                if (item.node.left) |left| {
+                    stack.push(.{
+                        .node = left,
+                        .depth = item.depth + 1,
+                    }) catch unreachable;
+                }
+            }
+
+            return max_height;
+        }
     };
 }
 
