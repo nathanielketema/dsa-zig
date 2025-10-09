@@ -256,6 +256,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             while (stack.pop()) |item| {
                 if (value == item.node.value) {
                     target = item;
+                    break;
                 } else if (value < item.node.value) {
                     if (item.node.left) |left| {
                         try stack.push(.{
@@ -441,7 +442,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn search_recursive(self: Self, needle: T) bool {
-            assert((self.count == 0) == (self.root == null));
             return search_recursive_helper(self.root, needle);
         }
 
@@ -487,8 +487,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn height_iterative(self: Self) usize {
-            assert((self.count == 0) == (self.root == null));
-
             const root = self.root orelse return 0;
 
             const NodeWithDepth = struct {
