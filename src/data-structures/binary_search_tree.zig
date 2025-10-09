@@ -82,22 +82,23 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         pub fn add_recursive(self: *Self, value: T) !void {
             assert((self.count == 0) == (self.root == null));
 
-            self.root = try add_recursive_helper(self.allocator, self.root, value);
-            self.count += 1;
+            self.root = try add_recursive_helper(self.allocator, self.root, value, &self.count);
         }
 
-        fn add_recursive_helper(allocator: Allocator, root: ?*Node, value: T) !?*Node {
+        fn add_recursive_helper(allocator: Allocator, root: ?*Node, value: T, count: *usize) !?*Node {
             if (root) |node| {
                 if (value < node.value) {
-                    node.left = try add_recursive_helper(allocator, node.left, value);
+                    node.left = try add_recursive_helper(allocator, node.left, value, count);
                 } else if (value > node.value) {
-                    node.right = try add_recursive_helper(allocator, node.right, value);
+                    node.right = try add_recursive_helper(allocator, node.right, value, count);
                 }
+                // duplicate found, do nothing
                 return node;
             }
 
             const new_node = try allocator.create(Node);
             new_node.* = .{ .value = value };
+            count.* += 1;
             return new_node;
         }
 
