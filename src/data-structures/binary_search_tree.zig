@@ -136,41 +136,39 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             const new_node = try self.allocator.create(Node);
             new_node.* = .{ .value = value };
 
-            if (self.root) |root| {
-                var current = root;
-                while (true) {
-                    switch (std.math.order(value, current.value)) {
-                        .lt => {
-                            if (current.left) |left| {
-                                current = left;
-                            } else {
-                                current.left = new_node;
-                                self.count += 1;
-                                return;
-                            }
-                        },
-                        .gt => {
-                            if (current.right) |right| {
-                                current = right;
-                            } else {
-                                current.right = new_node;
-                                self.count += 1;
-                                return;
-                            }
-                        },
-                        .eq => {
-                            // Because this tree doesn't accept duplicates
-                            // - do nothing
-                            // - free new_node
-                            self.allocator.destroy(new_node);
+            var current_node = self.root;
+            while (current_node) |current| {
+                switch (std.math.order(value, current.value)) {
+                    .lt => {
+                        if (current.left) |left| {
+                            current_node = left;
+                        } else {
+                            self.count += 1;
+                            current.left = new_node;
                             return;
-                        },
-                    }
+                        }
+                    },
+                    .gt => {
+                        if (current.right) |right| {
+                            current_node = right;
+                        } else {
+                            self.count += 1;
+                            current.right = new_node;
+                            return;
+                        }
+                    },
+                    .eq => {
+                        // Because this tree doesn't accept duplicates
+                        // - free new_node
+                        // - do nothing
+                        self.allocator.destroy(new_node);
+                        return;
+                    },
                 }
+            } else {
+                self.root = new_node;
+                self.count += 1;
             }
-
-            self.root = new_node;
-            self.count += 1;
         }
 
         /// Returns an error if value can't be found
