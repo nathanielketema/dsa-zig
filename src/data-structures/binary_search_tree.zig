@@ -4,22 +4,20 @@ const testing = std.testing;
 const assert = std.debug.assert;
 const Allocator = std.mem.Allocator;
 
-pub const BinarySearchTreeError = error{
-    TreeFull,
-    ValueNotFound,
-};
-
 pub const Implementation = enum {
     linked_list,
 };
 
-// The default implementation for now is Linked Lists. I plan to implement this using
-// ArrayList
+// The default implementation for now is Linked Lists. I plan to implement this using ArrayList
+/// A generic Binary Search Tree
+/// - does not accept duplicate values
+/// - use BinarySearchTreeWithImplementation for different implementation
 pub fn BinarySearchTree(comptime T: type) type {
     return BinarySearchTreeLinkedList(T);
 }
 
 /// A generic Binary Search Tree
+/// - does not accept duplicate values
 /// - user provides which implementation to use
 /// - use BinarySearchTree for the default implementation
 pub fn BinarySearchTreeWithImplementation(comptime T: type, impl: Implementation) type {
@@ -114,7 +112,12 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             self.root = try add_recursive_helper(self.allocator, self.root, value, &self.count);
         }
 
-        fn add_recursive_helper(allocator: Allocator, root: ?*Node, value: T, count: *usize) !?*Node {
+        fn add_recursive_helper(
+            allocator: Allocator,
+            root: ?*Node,
+            value: T,
+            count: *usize,
+        ) Allocator.Error!*Node {
             const node = root orelse {
                 const new_node = try allocator.create(Node);
                 new_node.* = .{ .value = value };
@@ -141,7 +144,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         /// Returns an error if it fails to allocate memory
-        pub fn add_iterative(self: *Self, value: T) !void {
+        pub fn add_iterative(self: *Self, value: T) Allocator.Error!void {
             const new_node = try self.allocator.create(Node);
             new_node.* = .{ .value = value };
 
@@ -184,82 +187,108 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         pub fn remove_recursive(self: *Self, value: T) !void {
             assert((self.count == 0) == (self.root == null));
 
-            self.root = try remove_recursive_helper(self.allocator, self.root, value);
-            self.count -= 1;
+            self.root = remove_recursive_helper(self.allocator, self.root, value, &self.count);
         }
 
-        fn remove_recursive_helper(allocator: Allocator, root: ?*Node, value: T) !?*Node {
-            const node = root orelse return BinarySearchTreeError.ValueNotFound;
+        fn remove_recursive_helper(
+            allocator: Allocator,
+            root: ?*Node,
+            value: T,
+            count: *usize,
+        ) ?*Node {
+            const node = root orelse return null;
 
             switch (std.math.order(value, node.value)) {
                 .lt => {
-                    node. left = try remove_recursive_helper(allocator, node.left, value);
+                    node.left = remove_recursive_helper(
+                        allocator,
+                        node.left,
+                        value,
+                        count,
+                    );
                     return node;
                 },
                 .gt => {
-                    node.right = try remove_recursive_helper(allocator, node.right, value);
+                    node.right = remove_recursive_helper(
+                        allocator,
+                        node.right,
+                        value,
+                        count,
+                    );
                     return node;
                 },
                 .eq => {
                     if (node.left == null and node.right == null) {
                         allocator.destroy(node);
+                        count.* -= 1;
                         return null;
                     }
 
                     if (node.left == null) {
                         const right_child = node.right;
                         allocator.destroy(node);
+                        count.* -= 1;
                         return right_child;
                     }
 
                     if (node.right == null) {
                         const left_child = node.left;
                         allocator.destroy(node);
+                        count.* -= 1;
                         return left_child;
                     }
 
-                    node.value = max_node(node.left).?.value;
-                    node.left = try remove_recursive_helper(allocator, node.left, node.value);
+                    const successor = max_node(node.left.?);
+                    node.value = successor.value;
+                    node.left = remove_recursive_helper(
+                        allocator,
+                        node.left,
+                        successor.value,
+                        count,
+                    );
                     return node;
-                }
+                },
             }
-
-            return node;
         }
 
-        fn max_node(root: ?*Node) ?*Node {
-            const node = root orelse return null;
-            if (node.right == null) {
-                return node;
+        fn max_node(root: *Node) *Node {
+            var current_node = root;
+            while (current_node.right) |right| {
+                current_node = right;
             }
-            return max_node(node.right);
+
+            return current_node;
         }
 
-        pub fn remove_iterative(self: *Self, value: T) !void {
+        pub fn remove_iterative(self: *Self, value: T) void {
             assert((self.count == 0) == (self.root == null));
             if (self.root == null) {
-                return BinarySearchTreeError.ValueNotFound;
+                return;
             }
+
             const ChildSide = enum { left, right };
 
             var parent: ?*Node = null;
             var side: ?ChildSide = null;
             var current_node = self.root;
+
             while (current_node) |current| {
-                if (value == current.value) {
-                    break;
-                }
-                parent = current;
-                if (value < current.value) {
-                    side = .left;
-                    current_node = current.left;
-                } else {
-                    side = .right;
-                    current_node = current.right;
+                switch (std.math.order(value, current.value)) {
+                    .eq => break,
+                    .lt => {
+                        side = .left;
+                        parent = current;
+                        current_node = current.left;
+                    },
+                    .gt => {
+                        side = .right;
+                        parent = current;
+                        current_node = current.right;
+                    },
                 }
             }
 
-            const node = current_node orelse return BinarySearchTreeError.ValueNotFound;
+            const node = current_node orelse return;
 
             if (node.left == null and node.right == null) {
                 if (parent) |p| {
@@ -323,9 +352,10 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             defer stack.deinit();
 
             try stack.push(self.root);
+            while (!stack.empty()) {
+                const item = stack.pop().?;
 
-            while (stack.pop()) |pop| {
-                if (pop) |node| {
+                if (item) |node| {
                     try list.append(self.allocator, node.value);
                     if (node.right) |right| {
                         try stack.push(right);
@@ -357,18 +387,18 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             var stack: Stack(?*Node) = .init(self.allocator, self.count);
             defer stack.deinit();
 
-            var current_node = self.root;
 
-            while (current_node != null or stack.count > 0) {
+            var current_node = self.root;
+            while (current_node != null or !stack.empty()) {
                 while (current_node) |current| {
                     try stack.push(current);
                     current_node = current.left;
                 }
-                if (stack.pop()) |pop| {
-                    if (pop) |node| {
-                        try list.append(self.allocator, node.value);
-                        current_node = node.right;
-                    }
+
+                const item = stack.pop().?;
+                if (item) |node| {
+                    try list.append(self.allocator, node.value);
+                    current_node = node.right;
                 }
             }
         }
@@ -390,29 +420,27 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         pub fn post_order_iterative(self: Self, list: *std.ArrayList(T)) !void {
-            if (self.root) |root| {
-                var stack: Stack(*Node) = .init(self.allocator, self.count);
-                defer stack.deinit();
+            const root = self.root orelse return;
+            var stack: Stack(*Node) = .init(self.allocator, self.count);
+            defer stack.deinit();
 
-                var visited: std.AutoHashMap(*Node, bool) = .init(self.allocator);
-                defer visited.deinit();
+            var visited: std.AutoHashMap(*Node, bool) = .init(self.allocator);
+            defer visited.deinit();
 
-                try stack.push(root);
+            try stack.push(root);
+            while (!stack.empty()) {
+                const current_node = stack.peek().?.*;
+                if (visited.get(current_node)) |_| {
+                    try list.append(self.allocator, stack.pop().?.value);
+                    continue;
+                }
+                try visited.put(current_node, true);
 
-                while (!stack.empty()) {
-                    const current_node = stack.peek().?.*;
-                    if (visited.get(current_node)) |_| {
-                        try list.append(self.allocator, stack.pop().?.value);
-                        continue;
-                    }
-                    try visited.put(current_node, true);
-
-                    if (current_node.right) |right| {
-                        try stack.push(right);
-                    }
-                    if (current_node.left) |left| {
-                        try stack.push(left);
-                    }
+                if (current_node.right) |right| {
+                    try stack.push(right);
+                }
+                if (current_node.left) |left| {
+                    try stack.push(left);
                 }
             }
         }
@@ -424,26 +452,20 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         fn search_recursive_helper(root: ?*Node, needle: T) bool {
             const node = root orelse return false;
 
-            if (needle == node.value) {
-                return true;
-            }
-
-            if (needle < node.value) {
-                return search_recursive_helper(node.left, needle);
-            } else {
-                return search_recursive_helper(node.right, needle);
-            }
+            return switch (std.math.order(needle, node.value)) {
+                .lt => search_recursive_helper(node.left, needle),
+                .gt => search_recursive_helper(node.right, needle),
+                .eq => true,
+            };
         }
 
         pub fn search_iterative(self: Self, needle: T) bool {
             var current_node = self.root;
             while (current_node) |node| {
-                if (needle == node.value) {
-                    return true;
-                } else if (needle < node.value) {
-                    current_node = node.left;
-                } else if (needle > node.value) {
-                    current_node = node.right;
+                switch (std.math.order(needle, node.value)) {
+                    .lt => current_node = node.left,
+                    .gt => current_node = node.right,
+                    .eq => return true,
                 }
             }
 
@@ -465,12 +487,12 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         pub fn height_iterative(self: Self) usize {
             const root = self.root orelse return 0;
 
-            const NodeWithDepth = struct {
+            const StackItem = struct {
                 node: *Node,
                 depth: usize,
             };
 
-            var stack = Stack(NodeWithDepth).init(self.allocator, self.count);
+            var stack = Stack(StackItem).init(self.allocator, self.count);
             defer stack.deinit();
 
             stack.push(.{
@@ -479,7 +501,8 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
             }) catch unreachable;
 
             var max_height: usize = 0;
-            while (stack.pop()) |item| {
+            while (!stack.empty()) {
+                const item = stack.pop().?;
                 max_height = @max(max_height, item.depth);
 
                 if (item.node.right) |right| {
@@ -511,8 +534,6 @@ test "binary search tree (linked list) operations: recursive" {
     defer bst.deinit_recursive();
 
     try testing.expect(bst.empty());
-    try testing.expectError(BinarySearchTreeError.ValueNotFound, bst.remove_recursive(8));
-
     try bst.add_recursive(8);
     try bst.add_recursive(8);
     try bst.add_recursive(6);
@@ -557,7 +578,6 @@ test "binary search tree (linked list) operations: iterative" {
     defer bst.deinit_iterative();
 
     try testing.expect(bst.empty());
-    try testing.expectError(BinarySearchTreeError.ValueNotFound, bst.remove_iterative(8));
 
     try bst.add_iterative(8);
     try bst.add_iterative(8);
@@ -582,16 +602,16 @@ test "binary search tree (linked list) operations: iterative" {
     try testing.expectEqual(bst.height_iterative(), 5);
 
     try testing.expect(bst.search_iterative(7));
-    try bst.remove_iterative(7);
+    bst.remove_iterative(7);
 
     try testing.expect(bst.search_iterative(6));
-    try bst.remove_iterative(6);
+    bst.remove_iterative(6);
 
     try testing.expect(bst.search_iterative(9));
-    try bst.remove_iterative(9);
+    bst.remove_iterative(9);
 
     try testing.expect(bst.search_iterative(8));
-    try bst.remove_iterative(8);
+    bst.remove_iterative(8);
 }
 
 test "swarm testing recursive against iterative approach" {
@@ -631,7 +651,7 @@ test "swarm testing recursive against iterative approach" {
                 const result_iterative = bst_iterative.remove_iterative(value);
 
                 if (result_recursive) {
-                    try result_iterative;
+                    result_iterative;
                 } else |err| {
                     try testing.expectError(err, result_iterative);
                 }
