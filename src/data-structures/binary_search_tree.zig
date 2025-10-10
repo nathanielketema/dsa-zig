@@ -115,20 +115,28 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         }
 
         fn add_recursive_helper(allocator: Allocator, root: ?*Node, value: T, count: *usize) !?*Node {
-            if (root) |node| {
-                if (value < node.value) {
-                    node.left = try add_recursive_helper(allocator, node.left, value, count);
-                } else if (value > node.value) {
-                    node.right = try add_recursive_helper(allocator, node.right, value, count);
-                }
-                // duplicate found, do nothing
-                return node;
-            }
+            const node = root orelse {
+                const new_node = try allocator.create(Node);
+                new_node.* = .{ .value = value };
+                count.* += 1;
+                return new_node;
+            };
 
-            const new_node = try allocator.create(Node);
-            new_node.* = .{ .value = value };
-            count.* += 1;
-            return new_node;
+            switch (std.math.order(value, node.value)) {
+                .lt => node.left = try add_recursive_helper(
+                    allocator,
+                    node.left,
+                    value,
+                    count,
+                ),
+                .gt => node.right = try add_recursive_helper(
+                    allocator,
+                    node.right,
+                    value,
+                    count,
+                ),
+                .eq => return node,
+            }
         }
 
         /// Returns an error if it fails to allocate memory
