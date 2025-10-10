@@ -229,97 +229,65 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
 
         pub fn remove_iterative(self: *Self, value: T) !void {
             assert((self.count == 0) == (self.root == null));
-            const root = self.root orelse return BinarySearchTreeError.ValueNotFound;
+            if (self.root == null) {
+                return BinarySearchTreeError.ValueNotFound;
+            }
+            const ChildSide = enum { left, right };
 
-            const ChildSide = enum {
-                left,
-                right,
-            };
-
-            const Context = struct {
-                node: *Node,
-                parent: ?*Node,
-                side: ?ChildSide,
-            };
-
-            var stack = Stack(Context).init(self.allocator, self.count);
-            defer stack.deinit();
-
-            try stack.push(.{
-                .node = root,
-                .parent = null,
-                .side = null,
-            });
-
-            var target: ?Context = null;
-            while (!stack.empty()) {
-                const item = stack.pop().?;
-
-                if (value == item.node.value) {
-                    target = item;
-                } else if (value < item.node.value) {
-                    if (item.node.left) |left| {
-                        try stack.push(.{
-                            .node = left,
-                            .parent = item.node,
-                            .side = .left,
-                        });
-                    }
+            var parent: ?*Node = null;
+            var side: ?ChildSide = null;
+            var current_node = self.root;
+            while (current_node) |current| {
+                if (value == current.value) {
+                    break;
+                }
+                parent = current;
+                if (value < current.value) {
+                    side = .left;
+                    current_node = current.left;
                 } else {
-                    if (item.node.right) |right| {
-                        try stack.push(.{
-                            .node = right,
-                            .parent = item.node,
-                            .side = .right,
-                        });
-                    }
+                    side = .right;
+                    current_node = current.right;
                 }
             }
 
-            const found = target orelse return BinarySearchTreeError.ValueNotFound;
-            const node = found.node;
+            const node = current_node orelse return BinarySearchTreeError.ValueNotFound;
 
             if (node.left == null and node.right == null) {
-                if (found.parent) |parent| {
-                    switch (found.side.?) {
-                        .left => parent.left = null,
-                        .right => parent.right = null,
+                if (parent) |p| {
+                    switch (side.?) {
+                        .left => p.left = null,
+                        .right => p.right = null,
                     }
                 } else {
                     self.root = null;
                 }
-
                 self.allocator.destroy(node);
             } else if (node.left == null or node.right == null) {
                 const child = node.left orelse node.right.?;
-
-                if (found.parent) |p| {
-                    switch (found.side.?) {
+                if (parent) |p| {
+                    switch (side.?) {
                         .left => p.left = child,
                         .right => p.right = child,
                     }
                 } else {
                     self.root = child;
                 }
-
                 self.allocator.destroy(node);
             } else {
                 var successor_parent = node;
                 var successor = node.left.?;
-
                 while (successor.right) |right| {
                     successor_parent = successor;
                     successor = right;
                 }
 
                 node.value = successor.value;
-
                 if (successor_parent == node) {
                     successor_parent.left = successor.left;
                 } else {
                     successor_parent.right = successor.left;
                 }
-
                 self.allocator.destroy(successor);
             }
 
