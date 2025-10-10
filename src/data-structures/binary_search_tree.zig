@@ -137,6 +137,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
                 ),
                 .eq => return node,
             }
+            return node;
         }
 
         /// Returns an error if it fails to allocate memory
@@ -190,36 +191,37 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
         fn remove_recursive_helper(allocator: Allocator, root: ?*Node, value: T) !?*Node {
             const node = root orelse return BinarySearchTreeError.ValueNotFound;
 
-            if (value < node.value) {
-                node.left = try remove_recursive_helper(allocator, node.left, value);
-                return node;
-            }
+            switch (std.math.order(value, node.value)) {
+                .lt => {
+                    node. left = try remove_recursive_helper(allocator, node.left, value);
+                    return node;
+                },
+                .gt => {
+                    node.right = try remove_recursive_helper(allocator, node.right, value);
+                    return node;
+                },
+                .eq => {
+                    if (node.left == null and node.right == null) {
+                        allocator.destroy(node);
+                        return null;
+                    }
 
-            if (value > node.value) {
-                node.right = try remove_recursive_helper(allocator, node.right, value);
-                return node;
-            }
+                    if (node.left == null) {
+                        const right_child = node.right;
+                        allocator.destroy(node);
+                        return right_child;
+                    }
 
-            if (value == node.value) {
-                if (node.left == null and node.right == null) {
-                    allocator.destroy(node);
-                    return null;
+                    if (node.right == null) {
+                        const left_child = node.left;
+                        allocator.destroy(node);
+                        return left_child;
+                    }
+
+                    node.value = max_node(node.left).?.value;
+                    node.left = try remove_recursive_helper(allocator, node.left, node.value);
+                    return node;
                 }
-
-                if (node.left == null) {
-                    const right_child = node.right;
-                    allocator.destroy(node);
-                    return right_child;
-                }
-
-                if (node.right == null) {
-                    const left_child = node.left;
-                    allocator.destroy(node);
-                    return left_child;
-                }
-
-                node.value = max_node(node.left).?.value;
-                node.left = try remove_recursive_helper(allocator, node.left, node.value);
             }
 
             return node;
