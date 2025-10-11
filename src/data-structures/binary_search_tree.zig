@@ -70,10 +70,10 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
 
         pub fn deinit_iterative(self: *Self) void {
             if (self.root) |root| {
-                var stack = Stack(*Node).init(self.allocator, self.count);
+                var stack: Stack(*Node) = .init(self.allocator, self.count);
                 defer stack.deinit();
 
-                var visited = std.AutoHashMap(*Node, void).init(self.allocator);
+                var visited:std.AutoHashMap(*Node, void) = .init(self.allocator);
                 defer visited.deinit();
 
                 stack.push(root) catch unreachable;
@@ -468,7 +468,6 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
                     .eq => return true,
                 }
             }
-
             return false;
         }
 
