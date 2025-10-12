@@ -78,17 +78,17 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
 
                 stack.push(root) catch unreachable;
                 while (!stack.empty()) {
-                    const current = stack.peek().?.*;
+                    const item = stack.peek().?.*;
 
-                    if (visited.contains(current)) {
+                    if (visited.contains(item)) {
                         _ = stack.pop();
-                        self.allocator.destroy(current);
+                        self.allocator.destroy(item);
                     } else {
-                        visited.put(current, {}) catch unreachable;
-                        if (current.right) |right| {
+                        visited.put(item, {}) catch unreachable;
+                        if (item.right) |right| {
                             stack.push(right) catch unreachable;
                         }
-                        if (current.left) |left| {
+                        if (item.left) |left| {
                             stack.push(left) catch unreachable;
                         }
                     }
@@ -622,7 +622,7 @@ test "swarm testing recursive against iterative approach" {
     defer bst_recursive.deinit_recursive();
 
     const N = 1_000;
-    var prng = std.Random.DefaultPrng.init(std.testing.random_seed);
+    var prng: std.Random.DefaultPrng = .init(std.testing.random_seed);
     const random = prng.random();
 
     const Operation = enum {
