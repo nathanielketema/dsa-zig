@@ -3,13 +3,10 @@ const assert = std.debug.assert;
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
-pub const StackError = error{FullStack};
-
 pub fn Stack(comptime T: type) type {
     return struct {
         allocator: Allocator,
         head: ?*Node,
-        capacity: usize,
         count: usize,
 
         const Self = @This();
@@ -20,11 +17,10 @@ pub fn Stack(comptime T: type) type {
         };
 
         /// Caller must call deinit() to free up memory after use
-        pub fn init(allocator: Allocator, capacity: usize) Self {
+        pub fn init(allocator: Allocator) Self {
             return .{
                 .allocator = allocator,
                 .head = null,
-                .capacity = capacity,
                 .count = 0,
             };
         }
@@ -37,15 +33,11 @@ pub fn Stack(comptime T: type) type {
             }
         }
 
-        pub fn push(self: *Self, value: T) (StackError || Allocator.Error)!void {
+        pub fn push(self: *Self, value: T) Allocator.Error!void {
             // This is a smart way to ensure if:
             // - count == 0, then self.head must be null, and if
             // - count != 0, then self.head must not be null
             assert((self.count == 0) == (self.head == null));
-
-            if (self.count >= self.capacity) {
-                return StackError.FullStack;
-            }
 
             const new_node = try self.allocator.create(Node);
             new_node.* = Node{
@@ -55,7 +47,6 @@ pub fn Stack(comptime T: type) type {
 
             self.head = new_node;
             self.count += 1;
-            assert(self.count <= self.capacity);
         }
 
         pub fn pop(self: *Self) ?T {
@@ -101,10 +92,9 @@ test "test stack operations" {
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
-    var stack: Stack(u8) = .init(allocator, 10);
+    var stack: Stack(u8) = .init(allocator);
     defer stack.deinit();
 
-    try testing.expect(stack.capacity == 10);
     try testing.expect(stack.count == 0);
     try testing.expect(stack.empty());
     try testing.expect(stack.pop() == null);
@@ -137,30 +127,4 @@ test "test stack operations" {
     try stack.push(8);
     try stack.push(9);
     try stack.push(10);
-
-    try testing.expect(stack.count == stack.capacity);
-}
-
-test "push beyond capacity" {
-    var gpa: std.heap.DebugAllocator(.{}) = .init;
-    defer assert(gpa.deinit() == .ok);
-    const allocator = gpa.allocator();
-
-    var stack: Stack(u8) = .init(allocator, 2);
-    defer stack.deinit();
-
-    try stack.push(1);
-    try stack.push(2);
-    try testing.expectError(StackError.FullStack, stack.push(3));
-}
-
-test "capacity zero stack" {
-    var gpa: std.heap.DebugAllocator(.{}) = .init;
-    defer assert(gpa.deinit() == .ok);
-    const allocator = gpa.allocator();
-
-    var stack: Stack(u8) = .init(allocator, 0);
-    defer stack.deinit();
-
-    try testing.expectError(StackError.FullStack, stack.push(1));
 }
