@@ -73,7 +73,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
                 var stack: Stack(*Node) = .init(self.allocator, self.count);
                 defer stack.deinit();
 
-                var visited:std.AutoHashMap(*Node, void) = .init(self.allocator);
+                var visited std.AutoHashMap(*Node, void).init(self.allocator);
                 defer visited.deinit();
 
                 stack.push(root) catch unreachable;
@@ -224,18 +224,11 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
                         return null;
                     }
 
-                    if (node.left == null) {
-                        const right_child = node.right;
+                    if (node.left == null or node.right == null) {
+                        const child = node.left orelse node.right.?;
                         allocator.destroy(node);
                         count.* -= 1;
-                        return right_child;
-                    }
-
-                    if (node.right == null) {
-                        const left_child = node.left;
-                        allocator.destroy(node);
-                        count.* -= 1;
-                        return left_child;
+                        return child;
                     }
 
                     const successor = max_node(node.left.?);
