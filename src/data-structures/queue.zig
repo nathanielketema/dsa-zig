@@ -10,7 +10,6 @@ pub fn Queue(comptime T: type) type {
         allocator: Allocator,
         in: ?*Node,
         out: ?*Node,
-        capacity: usize,
         count: usize,
 
         const Self = @This();
@@ -21,12 +20,11 @@ pub fn Queue(comptime T: type) type {
         };
 
         /// Caller must call deinit() to free memory
-        pub fn init(allocator: Allocator, capacity: usize) Self {
+        pub fn init(allocator: Allocator) Self {
             return .{
                 .allocator = allocator,
                 .in = null,
                 .out = null,
-                .capacity = capacity,
                 .count = 0,
             };
         }
@@ -44,10 +42,6 @@ pub fn Queue(comptime T: type) type {
             assert((self.count == 0) == (self.in == null));
             assert((self.count == 0) == (self.out == null));
 
-            if (self.count >= self.capacity) {
-                return QueueError.QueueFull;
-            }
-
             const new_node = try self.allocator.create(Node);
             new_node.* = Node{
                 .value = value,
@@ -63,7 +57,6 @@ pub fn Queue(comptime T: type) type {
             }
 
             self.count += 1;
-            assert(self.count <= self.capacity);
         }
 
         pub fn pop(self: *Self) ?T {
@@ -127,10 +120,9 @@ test "test queue" {
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
-    var queue: Queue(u8) = .init(allocator, 10);
+    var queue: Queue(u8) = .init(allocator);
     defer queue.deinit();
 
-    try testing.expect(queue.capacity == 10);
     try testing.expect(queue.count == 0);
     try testing.expect(queue.empty());
     try testing.expect(queue.pop() == null);
@@ -169,21 +161,6 @@ test "test queue" {
     try queue.push(8);
     try queue.push(9);
     try queue.push(10);
-
-    try testing.expect(queue.count == queue.capacity);
-}
-
-test "push beyond capacity" {
-    var gpa: std.heap.DebugAllocator(.{}) = .init;
-    defer assert(gpa.deinit() == .ok);
-    const allocator = gpa.allocator();
-
-    var queue: Queue(u8) = .init(allocator, 2);
-    defer queue.deinit();
-
-    try queue.push(1);
-    try queue.push(2);
-    try testing.expectError(QueueError.QueueFull, queue.push(3));
 }
 
 test "empty then refill" {
@@ -191,7 +168,7 @@ test "empty then refill" {
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
-    var queue: Queue(u8) = .init(allocator, 5);
+    var queue: Queue(u8) = .init(allocator);
     defer queue.deinit();
 
     try queue.push(1);
