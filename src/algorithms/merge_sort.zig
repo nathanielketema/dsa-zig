@@ -47,31 +47,31 @@ fn merge(
     @memcpy(scratch[0..left.len], left);
     @memcpy(scratch[left.len..result.len], right);
 
-    var left_index: usize = 0;
-    var right_index: usize = left.len;
-    var result_index: usize = 0;
+    var i: usize = 0;
+    var j: usize = left.len;
+    var k: usize = 0;
 
-    while (left_index < left.len and right_index < result.len) {
-        if (scratch[left_index] <= scratch[right_index]) {
-            result[result_index] = scratch[left_index];
-            left_index += 1;
+    while (i < left.len and j < result.len) {
+        if (scratch[i] <= scratch[j]) {
+            result[k] = scratch[i];
+            i += 1;
         } else {
-            result[result_index] = scratch[right_index];
-            right_index += 1;
+            result[k] = scratch[j];
+            j += 1;
         }
-        result_index += 1;
+        k += 1;
     }
 
-    while (left_index < left.len) {
-        result[result_index] = scratch[left_index];
-        left_index += 1;
-        result_index += 1;
+    while (i < left.len) {
+        result[k] = scratch[i];
+        i += 1;
+        k += 1;
     }
 
-    while (right_index < result.len) {
-        result[result_index] = scratch[right_index];
-        right_index += 1;
-        result_index += 1;
+    while (j < result.len) {
+        result[k] = scratch[j];
+        j += 1;
+        k += 1;
     }
 }
 
