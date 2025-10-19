@@ -16,7 +16,6 @@ pub fn merge_sort(allocator: Allocator, comptime T: type, list: []T) !void {
 
 fn merge_sort_helper(comptime T: type, list: []T, scratch: []T) void {
     assert(list.len <= scratch.len);
-    if (list.len <= 1) return;
 
     // Use bubble sort for small arrays for efficiency
     if (list.len <= 16) {
@@ -45,13 +44,13 @@ fn merge(
 
     // Copy to scratch buffer for the merge
     @memcpy(scratch[0..left.len], left);
-    @memcpy(scratch[left.len..result.len], right);
+    @memcpy(scratch[left.len..right.len], right);
 
     var i: usize = 0;
     var j: usize = left.len;
     var k: usize = 0;
 
-    while (i < left.len and j < result.len) {
+    while (i < left.len and j < right.len) {
         if (scratch[i] <= scratch[j]) {
             result[k] = scratch[i];
             i += 1;
@@ -62,15 +61,13 @@ fn merge(
         k += 1;
     }
 
-    while (i < left.len) {
+    while (i < left.len) : (i += 1) {
         result[k] = scratch[i];
-        i += 1;
         k += 1;
     }
 
-    while (j < result.len) {
+    while (j < right.len) : (j += 1) {
         result[k] = scratch[j];
-        j += 1;
         k += 1;
     }
 }
