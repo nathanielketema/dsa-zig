@@ -50,12 +50,22 @@ pub fn build(b: *std.Build) void {
         })
     });
 
+
+    const exe_insertion = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/algorithms/insertion_sort.zig"),
+            .target = target,
+            .optimize = optimize,
+        })
+    });
+
     const build_steps = .{
         .test_stack_step = b.step("test_stack", "Test Stack"),
         .test_queue_step = b.step("test_queue", "Test Queue"),
         .test_bst_step = b.step("test_bst", "Test Binary Search Tree"),
         .test_bubble_step = b.step("test_bubble", "Test Bubble Sort"), 
         .test_merge_step = b.step("test_merge", "Test Merge Sort"), 
+        .test_insertion_step = b.step("test_insertion", "Test Insertion Sort"), 
     };
 
     const cmds = .{
@@ -64,6 +74,7 @@ pub fn build(b: *std.Build) void {
         .test_bst_cmd = b.addRunArtifact(exe_bst),
         .test_bubble_cmd = b.addRunArtifact(exe_bubble),
         .test_merge_cmd = b.addRunArtifact(exe_merge),
+        .test_insertion_cmd = b.addRunArtifact(exe_insertion),
     };
 
     build_steps.test_stack_step.dependOn(&cmds.test_stack_cmd.step);
@@ -71,4 +82,5 @@ pub fn build(b: *std.Build) void {
     build_steps.test_bst_step.dependOn(&cmds.test_bst_cmd.step);
     build_steps.test_bubble_step.dependOn(&cmds.test_bubble_cmd.step);
     build_steps.test_merge_step.dependOn(&cmds.test_merge_cmd.step);
+    build_steps.test_insertion_step.dependOn(&cmds.test_insertion_cmd.step);
 }
