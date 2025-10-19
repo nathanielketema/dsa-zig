@@ -12,3 +12,5 @@ pub const BinarySearchTreeWithImplementation = @import(
 
 // Available Algorithms
 pub const bubble_sort = @import("algorithms/bubble_sort.zig").bubble_sort;
+pub const merge_sort = @import("algorithms/merge_sort.zig").merge_sort;
+pub const insertion_sort = @import("algorithms/insertion_sort.zig").insertion_sort;
