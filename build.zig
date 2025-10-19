@@ -4,83 +4,68 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-     _ = b.addModule("dsa", .{
+    _ = b.addModule("dsa", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    const exe_stack = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/data-structures/stack.zig"),
-            .target = target,
-            .optimize = optimize,
-        })
-    });
-
-    const exe_queue = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/data-structures/queue.zig"),
-            .target = target,
-            .optimize = optimize,
-        })
-    });
-
-    const exe_bst = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/data-structures/binary_search_tree.zig"),
-            .target = target,
-            .optimize = optimize,
-        })
-    });
-
-    const exe_bubble = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/algorithms/bubble_sort.zig"),
-            .target = target,
-            .optimize = optimize,
-        })
-    });
-
-    const exe_merge = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/algorithms/merge_sort.zig"),
-            .target = target,
-            .optimize = optimize,
-        })
-    });
-
-
-    const exe_insertion = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/algorithms/insertion_sort.zig"),
-            .target = target,
-            .optimize = optimize,
-        })
-    });
-
-    const build_steps = .{
-        .test_stack_step = b.step("test_stack", "Test Stack"),
-        .test_queue_step = b.step("test_queue", "Test Queue"),
-        .test_bst_step = b.step("test_bst", "Test Binary Search Tree"),
-        .test_bubble_step = b.step("test_bubble", "Test Bubble Sort"), 
-        .test_merge_step = b.step("test_merge", "Test Merge Sort"), 
-        .test_insertion_step = b.step("test_insertion", "Test Insertion Sort"), 
+    const TestFile = struct {
+        name: []const u8,
+        path: []const u8,
+        description: []const u8,
     };
 
-    const cmds = .{
-        .test_stack_cmd = b.addRunArtifact(exe_stack),
-        .test_queue_cmd = b.addRunArtifact(exe_queue),
-        .test_bst_cmd = b.addRunArtifact(exe_bst),
-        .test_bubble_cmd = b.addRunArtifact(exe_bubble),
-        .test_merge_cmd = b.addRunArtifact(exe_merge),
-        .test_insertion_cmd = b.addRunArtifact(exe_insertion),
+    const test_files = [_]TestFile{
+        .{
+            .name = "stack",
+            .path = "src/data-structures/stack.zig",
+            .description = "Test Stack",
+        },
+        .{
+            .name = "queue",
+            .path = "src/data-structures/queue.zig",
+            .description = "Test Queue",
+        },
+        .{
+            .name = "bst",
+            .path = "src/data-structures/binary_search_tree.zig",
+            .description = "Test Binary Search Tree",
+        },
+        .{
+            .name = "bubble",
+            .path = "src/algorithms/bubble_sort.zig",
+            .description = "Test Bubble Sort",
+        },
+        .{
+            .name = "merge",
+            .path = "src/algorithms/merge_sort.zig",
+            .description = "Test Merge Sort",
+        },
+        .{
+            .name = "insertion",
+            .path = "src/algorithms/insertion_sort.zig",
+            .description = "Test Insertion Sort",
+        },
     };
 
-    build_steps.test_stack_step.dependOn(&cmds.test_stack_cmd.step);
-    build_steps.test_queue_step.dependOn(&cmds.test_queue_cmd.step);
-    build_steps.test_bst_step.dependOn(&cmds.test_bst_cmd.step);
-    build_steps.test_bubble_step.dependOn(&cmds.test_bubble_cmd.step);
-    build_steps.test_merge_step.dependOn(&cmds.test_merge_cmd.step);
-    build_steps.test_insertion_step.dependOn(&cmds.test_insertion_cmd.step);
+    const test_all_step = b.step("test", "Run all tests");
+
+    for (test_files) |test_file| {
+        const test_exe = b.addTest(.{
+            .root_module = b.createModule(.{
+                .root_source_file = b.path(test_file.path),
+                .target = target,
+                .optimize = optimize,
+            }),
+        });
+
+        const run_all_test = b.addRunArtifact(test_exe);
+        test_all_step.dependOn(&run_all_test.step);
+
+        const step_name = b.fmt("test_{s}", .{test_file.name});
+        const test_step = b.step(step_name, test_file.description);
+        const run_test = b.addRunArtifact(test_exe);
+        test_step.dependOn(&run_test.step);
+    }
 }
