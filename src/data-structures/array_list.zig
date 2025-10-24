@@ -63,7 +63,7 @@ pub fn ArrayList(comptime T: type) type {
 
             const new_count = self.count + 1;
             if (new_count > self.capacity) {
-                const new_capacity = 2 * self.capacity;
+                const new_capacity = self.capacity + self.capacity / 2 + 8;
                 try self.ensure_total_capacity(allocator, new_capacity);
             }
             assert(self.count < self.capacity);
@@ -85,7 +85,7 @@ pub fn ArrayList(comptime T: type) type {
 
             const new_count = self.count + 1;
             if (new_count > self.capacity) {
-                const new_capacity = 2 * self.capacity;
+                const new_capacity = self.capacity + self.capacity / 2 + 8;
                 try self.ensure_total_capacity(allocator, new_capacity);
             }
             assert(self.count < self.capacity);
