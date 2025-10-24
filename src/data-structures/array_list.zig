@@ -117,7 +117,7 @@ pub fn ArrayList(comptime T: type) type {
 
             const index_found = for (self.items[0..self.count], 0..) |list_item, i| {
                 if (std.meta.eql(list_item, item)) break i;
-            } else return false; 
+            } else return false;
             assert(index_found < self.count);
 
             var i = index_found;
@@ -318,4 +318,91 @@ test "ArrayList: empty constant" {
 
     try testing.expectEqual(@as(usize, 0), EmptyList.empty.count);
     try testing.expectEqual(@as(usize, 0), EmptyList.empty.capacity);
+}
+
+test "ArrayList: swarm test against std.ArrayList" {
+    var prng = std.Random.DefaultPrng.init(std.testing.random_seed);
+    const random = prng.random();
+
+    const Model = std.ArrayList(u32);
+    const Array = ArrayList(u32);
+
+    var model: Model = .{};
+    defer model.deinit(testing.allocator);
+
+    var array = try Array.init_capacity(testing.allocator, 8);
+    defer array.deinit(testing.allocator);
+
+    for (0..1000) |_| {
+        assert(array.count == model.items.len);
+
+        for (model.items, 0..) |item, i| {
+            assert(array.items[i] == item);
+        }
+
+        const swarm_distribution = random.enumValue(std.meta.DeclEnum(Array));
+
+        switch (swarm_distribution) {
+            .push => {
+                const value = random.int(u32);
+                try array.push(testing.allocator, value);
+                try model.append(testing.allocator, value);
+                assert(array.count == model.items.len);
+                assert(array.items[array.count - 1] == value);
+            },
+            .pop => {
+                const array_result = array.pop();
+                const model_result = if (model.items.len > 0) model.pop() else null;
+                assert(std.meta.eql(array_result, model_result));
+                assert(array.count == model.items.len);
+            },
+            .add_at => {
+                if (array.count > 0 or random.boolean()) {
+                    const index = random.uintLessThanBiased(usize, array.count + 1);
+                    const value = random.int(u32);
+                    try array.add_at(testing.allocator, index, value);
+                    try model.insert(testing.allocator, index, value);
+                    assert(array.count == model.items.len);
+                    assert(array.items[index] == value);
+                }
+            },
+            .remove => {
+                if (array.count > 0) {
+                    const index = random.uintLessThanBiased(usize, array.count);
+                    const value = array.items[index];
+
+                    const array_found = array.remove(value);
+
+                    const model_found = for (model.items, 0..) |item, i| {
+                        if (item == value) {
+                            _ = model.orderedRemove(i);
+                            break true;
+                        }
+                    } else false;
+
+                    assert(array_found == model_found);
+                    assert(array.count == model.items.len);
+                }
+            },
+            .clone => {
+                var array_clone = try array.clone(testing.allocator);
+                defer array_clone.deinit(testing.allocator);
+
+                var model_clone = try model.clone(testing.allocator);
+                defer model_clone.deinit(testing.allocator);
+
+                assert(array_clone.count == model_clone.items.len);
+                assert(array_clone.count == array.count);
+                for (model_clone.items, 0..) |item, i| {
+                    assert(array_clone.items[i] == item);
+                }
+            },
+            else => {},
+        }
+    }
+
+    assert(array.count == model.items.len);
+    for (model.items, 0..) |item, i| {
+        assert(array.items[i] == item);
+    }
 }
