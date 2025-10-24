@@ -47,6 +47,11 @@ pub fn build(b: *std.Build) void {
             .path = "src/algorithms/insertion_sort.zig",
             .description = "Test Insertion Sort",
         },
+        .{
+            .name = "array_list",
+            .path = "src/data-structures/array_list.zig",
+            .description = "Test Array List",
+        },
     };
 
     const test_all_step = b.step("test", "Run all tests");
