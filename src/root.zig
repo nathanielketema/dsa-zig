@@ -9,6 +9,8 @@ pub const BinarySearchTree = @import("data-structures/binary_search_tree.zig").B
 pub const BinarySearchTreeWithImplementation = @import(
     "data-structures/binary_search_tree.zig",
 ).BinarySearchTreeWithImplementation;
+pub const ArrayList = @import("data-structures/array_list.zig").ArrayList;
+pub const HashMap = @import("data-structures/hash_map.zig").HashMap;
 
 // Available Algorithms
 pub const bubble_sort = @import("algorithms/bubble_sort.zig").bubble_sort;
