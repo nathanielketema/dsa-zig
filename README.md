@@ -1,8 +1,8 @@
 # Data Structures and Algorithms (DSA) using zig
 
-I'm trying to learn the zig way of implementing common data structures and
-algorithms in [zig](https://github.com/ziglang/zig.git). Any advice is much 
-appreciated.
+This codebase contains common data structures and algorithms
+in [zig](https://github.com/ziglang/zig.git). It's tailored for beginners learning DSA or
+for programmers exploring the language.
 
 ## Setup
 
@@ -45,7 +45,7 @@ pub fn main() !void {
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
 
-    var stack = Stack(u8).init(allocator);
+    var stack: Stack(u8) = .init(allocator);
     defer stack.deinit();
 
     try stack.push(1);
