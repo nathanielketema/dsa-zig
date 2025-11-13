@@ -63,9 +63,7 @@ pub fn Heap(comptime T: type, mode: HeapMode) type {
             self.nodes.items[0] = self.nodes.items[self.count - 1];
             _ = self.nodes.pop();
             self.count -= 1;
-
-            const index: Index = @enumFromInt(0);
-            self.sift_down(index);
+            self.sift_down();
 
             return popped;
         }
@@ -95,7 +93,7 @@ pub fn Heap(comptime T: type, mode: HeapMode) type {
         }
 
         fn sift_up(self: *Self, index: Index) void {
-            var idx: u32 = @intFromEnum(index);
+            var idx: usize = @intFromEnum(index);
             while (idx > 0) {
                 const parent_idx = (idx - 1) / 2;
                 if (!compare(self.nodes.items[idx], self.nodes.items[parent_idx])) {
@@ -106,8 +104,8 @@ pub fn Heap(comptime T: type, mode: HeapMode) type {
             }
         }
 
-        fn sift_down(self: *Self, index: Index) void {
-            var idx = @intFromEnum(index);
+        fn sift_down(self: *Self) void {
+            var idx: usize = 0;
             while (true) {
                 const left_idx = (2 * idx) + 1;
                 const right_idx = (2 * idx) + 2;
