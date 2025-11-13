@@ -57,6 +57,11 @@ pub fn build(b: *std.Build) void {
             .path = "src/data-structures/hash_map.zig",
             .description = "Test Hash Map",
         },
+        .{
+            .name = "heap",
+            .path = "src/data-structures/heap.zig",
+            .description = "Test Heap",
+        },
     };
 
     const test_all_step = b.step("test", "Run all tests");
