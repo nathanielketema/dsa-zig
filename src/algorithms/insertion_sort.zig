@@ -2,17 +2,16 @@ const std = @import("std");
 const assert = std.debug.assert;
 const testing = std.testing;
 
-pub fn insertion_sort(comptime T: type, list: []T) void {
-    if (list.len <= 1) return;
+pub fn insertion_sort(comptime T: type, items: []T) void {
+    if (items.len <= 1) return;
 
-    for (1..list.len) |i| {
-        const key = list[i];
+    for (1..items.len) |i| {
+        const key = items[i];
         var j = i;
-        while (j > 0 and list[j - 1] > key) {
-            list[j] = list[j - 1];
-            j -= 1;
+        while (j > 0 and items[j - 1] > key) : (j -= 1) {
+            items[j] = items[j - 1];
         }
-        list[j] = key;
+        items[j] = key;
     }
 }
 
