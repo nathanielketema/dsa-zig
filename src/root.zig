@@ -17,3 +17,4 @@ pub const Heap = @import("data-structures/heap.zig").Heap;
 pub const bubble_sort = @import("algorithms/bubble_sort.zig").bubble_sort;
 pub const merge_sort = @import("algorithms/merge_sort.zig").merge_sort;
 pub const insertion_sort = @import("algorithms/insertion_sort.zig").insertion_sort;
+pub const heap_sort = @import("algorithms/heap_sort.zig").heap_sort;
