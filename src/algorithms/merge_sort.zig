@@ -4,33 +4,33 @@ const testing = std.testing;
 const bubble_sort = @import("bubble_sort.zig").bubble_sort;
 const Allocator = std.mem.Allocator;
 
-pub fn merge_sort(allocator: Allocator, comptime T: type, list: []T) !void {
-    if (list.len <= 1) return;
+pub fn merge_sort(allocator: Allocator, comptime T: type, items: []T) !void {
+    if (items.len <= 1) return;
 
     // allocate memory once
-    const scratch = try allocator.alloc(T, list.len);
+    const scratch = try allocator.alloc(T, items.len);
     defer allocator.free(scratch);
 
-    merge_sort_helper(T, list, scratch);
+    merge_sort_helper(T, items, scratch);
 }
 
-fn merge_sort_helper(comptime T: type, list: []T, scratch: []T) void {
-    assert(list.len <= scratch.len);
+fn merge_sort_helper(comptime T: type, items: []T, scratch: []T) void {
+    assert(items.len <= scratch.len);
 
     // Use bubble sort for small arrays for efficiency
-    if (list.len <= 16) {
-        bubble_sort(T, list);
+    if (items.len <= 16) {
+        bubble_sort(T, items);
         return;
     }
 
-    const mid = list.len / 2;
-    const left = list[0..mid];
-    const right = list[mid..list.len];
+    const mid = items.len / 2;
+    const left = items[0..mid];
+    const right = items[mid..items.len];
 
     merge_sort_helper(T, left, scratch[0..mid]);
-    merge_sort_helper(T, right, scratch[mid..list.len]);
+    merge_sort_helper(T, right, scratch[mid..items.len]);
 
-    merge(T, left, right, list, scratch);
+    merge(T, left, right, items, scratch);
 }
 
 fn merge(
@@ -73,18 +73,18 @@ fn merge(
 }
 
 test "merge_sort u8" {
-    var list = [_]u8{ 1, 7, 2, 6 };
-    try merge_sort(testing.allocator, u8, &list);
-    try testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 6, 7 }, &list);
+    var items = [_]u8{ 1, 7, 2, 6 };
+    try merge_sort(testing.allocator, u8, &items);
+    try testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 6, 7 }, &items);
 }
 
 test "merge_sort i32" {
-    var list = [_]i32{ 5, 2, 8, 1, 9, 3, 7, 4, 6 };
-    try merge_sort(testing.allocator, i32, &list);
+    var items = [_]i32{ 5, 2, 8, 1, 9, 3, 7, 4, 6 };
+    try merge_sort(testing.allocator, i32, &items);
     try testing.expectEqualSlices(
         i32,
         &[_]i32{ 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-        &list,
+        &items,
     );
 }
 
@@ -99,21 +99,21 @@ test "merge_sort empty and single" {
 }
 
 test "merge_sort duplicates" {
-    var list = [_]i32{ 3, 1, 4, 1, 5, 9, 2, 6, 5, 3 };
-    try merge_sort(testing.allocator, i32, &list);
+    var items = [_]i32{ 3, 1, 4, 1, 5, 9, 2, 6, 5, 3 };
+    try merge_sort(testing.allocator, i32, &items);
     try testing.expectEqualSlices(
         i32,
         &[_]i32{ 1, 1, 2, 3, 3, 4, 5, 5, 6, 9 },
-        &list,
+        &items,
     );
 }
 
 test "merge_sort floats" {
-    var list = [_]f32{ 3.14, 1.41, 2.71, 0.57 };
-    try merge_sort(testing.allocator, f32, &list);
+    var items = [_]f32{ 3.14, 1.41, 2.71, 0.57 };
+    try merge_sort(testing.allocator, f32, &items);
     try testing.expectEqualSlices(
         f32,
         &[_]f32{ 0.57, 1.41, 2.71, 3.14 },
-        &list,
+        &items,
     );
 }
