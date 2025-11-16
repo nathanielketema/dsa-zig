@@ -18,3 +18,5 @@ pub const bubble_sort = @import("algorithms/bubble_sort.zig").bubble_sort;
 pub const merge_sort = @import("algorithms/merge_sort.zig").merge_sort;
 pub const insertion_sort = @import("algorithms/insertion_sort.zig").insertion_sort;
 pub const heap_sort = @import("algorithms/heap_sort.zig").heap_sort;
+pub const quick_sort = @import("algorithms/quick_sort.zig").quick_sort;
+pub const selection_sort = @import("algorithms/selection_sort.zig").selection_sort;

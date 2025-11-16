@@ -67,6 +67,16 @@ pub fn build(b: *std.Build) void {
             .path = "src/algorithms/heap_sort.zig",
             .description = "Test Heap Sort",
         },
+        .{
+            .name = "quick_sort",
+            .path = "src/algorithms/quick_sort.zig",
+            .description = "Test Quick Sort",
+        },
+        .{
+            .name = "selection_sort",
+            .path = "src/algorithms/selection_sort.zig",
+            .description = "Test Selection Sort",
+        },
     };
 
     const test_all_step = b.step("test", "Run all tests");
