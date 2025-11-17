@@ -5,7 +5,7 @@ const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
 pub fn heap_sort(comptime T: type, items: []T) !void {
-    if (items.len == 0) return;
+    if (items.len <= 1) return;
 
     var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer assert(gpa.deinit() == .ok);
