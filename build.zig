@@ -77,6 +77,11 @@ pub fn build(b: *std.Build) void {
             .path = "src/algorithms/selection_sort.zig",
             .description = "Test Selection Sort",
         },
+        .{
+            .name = "graph",
+            .path = "src/data-structures/graph.zig",
+            .description = "Test Graph",
+        },
     };
 
     const test_all_step = b.step("test", "Run all tests");
