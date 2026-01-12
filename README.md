@@ -1,7 +1,7 @@
 # Data Structures and Algorithms (DSA) using zig
 
 This codebase contains common data structures and algorithms
-in [zig](https://github.com/ziglang/zig.git). It's tailored for beginners learning DSA or
+in [zig](https://ziglang.org/). It's tailored for beginners learning DSA or
 for programmers exploring the language.
 
 ## Setup
@@ -46,10 +46,8 @@ You can then use any static HTTP server to view the generated page.
 - example using `http-server`
 
   ```console
-  http-server ./zig-out/docs/index.html
+  http-server zig-out/docs/
   ```
-
-  then open you browser to view the [page](localhost:8080)
 
 ### Example
 
