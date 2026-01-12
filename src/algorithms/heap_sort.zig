@@ -1,9 +1,10 @@
 const std = @import("std");
-const Heap = @import("heap").Heap;
+const Heap = @import("dsa").Heap;
 const assert = std.debug.assert;
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
+/// O(n log n) time complexity
 pub fn heap_sort(comptime T: type, items: []T) !void {
     if (items.len <= 1) return;
 
@@ -24,7 +25,7 @@ pub fn heap_sort(comptime T: type, items: []T) !void {
     }
 }
 
-test "test" {
+test heap_sort {
     var array = [_]u8{ 5, 3, 4, 1, 2 };
     try heap_sort(u8, &array);
 

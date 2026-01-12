@@ -115,6 +115,26 @@ pub fn Queue(comptime T: type) type {
     };
 }
 
+test Queue {
+    var queue: Queue(u8) = .init(testing.allocator);
+    defer queue.deinit();
+
+    try testing.expect(queue.count == 0);
+    try testing.expect(queue.empty());
+    try testing.expect(queue.pop() == null);
+    try testing.expect(queue.peek() == null);
+    try testing.expect(queue.peek_last() == null);
+
+    try queue.push(17);
+    try queue.push(2);
+    try queue.push(20);
+
+    try testing.expect(queue.count == 3);
+    try testing.expect(queue.contains(2));
+    try testing.expectEqual(queue.peek().?.*, 17);
+    try testing.expectEqual(queue.peek_last().?.*, 20);
+}
+
 test "test queue" {
     var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer assert(gpa.deinit() == .ok);

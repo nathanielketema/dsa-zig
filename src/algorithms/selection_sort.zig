@@ -2,6 +2,7 @@ const std = @import("std");
 const assert = std.debug.assert;
 const testing = std.testing;
 
+/// O(n²) time complexity
 pub fn selection_sort(comptime T: type, items: []T) void {
     if (items.len <= 1) return;
 
@@ -19,7 +20,7 @@ pub fn selection_sort(comptime T: type, items: []T) void {
     }
 }
 
-test "test" {
+test selection_sort {
     var array = [_]u8{ 5, 3, 4, 1, 2 };
     selection_sort(u8, &array);
 

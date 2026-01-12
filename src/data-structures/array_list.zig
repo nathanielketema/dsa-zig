@@ -3,22 +3,22 @@ const assert = std.debug.assert;
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
-pub fn Array_List(comptime T: type) type {
+pub fn ArrayList(comptime T: type) type {
     return struct {
         items: []T,
         count: usize,
         capacity: usize,
 
-        const ArrayList = @This();
+        const Self = @This();
         const default_capacity = 10;
 
         /// Caller must free memory by calling deinit()
-        pub fn init(allocator: Allocator) Allocator.Error!ArrayList {
+        pub fn init(allocator: Allocator) Allocator.Error!Self {
             return init_capacity(allocator, default_capacity);
         }
 
         /// Caller must free memory by calling deinit()
-        pub fn init_capacity(allocator: Allocator, capacity: usize) Allocator.Error!ArrayList {
+        pub fn init_capacity(allocator: Allocator, capacity: usize) Allocator.Error!Self {
             assert(capacity > 0);
             const buffer = try allocator.alloc(T, capacity);
             return .{
@@ -28,14 +28,14 @@ pub fn Array_List(comptime T: type) type {
             };
         }
 
-        pub fn deinit(self: *ArrayList, allocator: Allocator) void {
+        pub fn deinit(self: *Self, allocator: Allocator) void {
             assert(self.count <= self.capacity);
 
             allocator.free(self.items);
             self.* = undefined;
         }
 
-        pub fn push(self: *ArrayList, allocator: Allocator, item: T) Allocator.Error!void {
+        pub fn push(self: *Self, allocator: Allocator, item: T) Allocator.Error!void {
             assert(self.count <= self.capacity);
 
             if (self.count == self.capacity) {
@@ -47,7 +47,7 @@ pub fn Array_List(comptime T: type) type {
             self.count += 1;
         }
 
-        pub fn pop(self: *ArrayList) ?T {
+        pub fn pop(self: *Self) ?T {
             assert(self.count <= self.capacity);
 
             if (self.count == 0) return null;
@@ -58,7 +58,7 @@ pub fn Array_List(comptime T: type) type {
         }
 
         pub fn add_at(
-            self: *ArrayList,
+            self: *Self,
             allocator: Allocator,
             index: usize,
             item: T,
@@ -84,7 +84,7 @@ pub fn Array_List(comptime T: type) type {
             self.count += 1;
         }
 
-        pub fn remove(self: *ArrayList, item: T) bool {
+        pub fn remove(self: *Self, item: T) bool {
             assert(self.count <= self.capacity);
 
             const index: usize = for (self.items[0..self.count], 0..) |itm, i| {
@@ -99,12 +99,12 @@ pub fn Array_List(comptime T: type) type {
             return true;
         }
 
-        pub fn clear(self: *ArrayList) void {
+        pub fn clear(self: *Self) void {
             assert(self.count <= self.capacity);
             self.count = 0;
         }
 
-        pub fn contains(self: *const ArrayList, item: T) bool {
+        pub fn contains(self: *const Self, item: T) bool {
             assert(self.count <= self.capacity);
 
             for (self.items[0..self.count]) |itm| {
@@ -116,7 +116,7 @@ pub fn Array_List(comptime T: type) type {
         }
 
         /// Caller must free memory by calling deinit()
-        pub fn clone(self: *const ArrayList, allocator: Allocator) Allocator.Error!ArrayList {
+        pub fn clone(self: *const Self, allocator: Allocator) Allocator.Error!Self {
             assert(self.count <= self.capacity);
 
             var cloned = try init_capacity(allocator, self.capacity);
@@ -126,14 +126,14 @@ pub fn Array_List(comptime T: type) type {
             return cloned;
         }
 
-        pub fn from_slice(allocator: Allocator, slice: []const T) Allocator.Error!ArrayList {
+        pub fn from_slice(allocator: Allocator, slice: []const T) Allocator.Error!Self {
             var list = try init_capacity(allocator, slice.len);
             @memcpy(list.items[0..slice.len], slice);
             list.count = slice.len;
             return list;
         }
 
-        fn new(self: *ArrayList, allocator: Allocator, new_capacity: usize) Allocator.Error!void {
+        fn new(self: *Self, allocator: Allocator, new_capacity: usize) Allocator.Error!void {
             assert(new_capacity > 0);
             assert(self.count < new_capacity);
 
@@ -147,8 +147,25 @@ pub fn Array_List(comptime T: type) type {
     };
 }
 
+test ArrayList {
+    const allocator = testing.allocator;
+    var array_list: ArrayList(u8) = try .init_capacity(allocator, 10);
+    defer array_list.deinit(allocator);
+
+    try testing.expectEqual(@as(usize, 0), array_list.count);
+
+    try array_list.push(allocator, 4);
+    try array_list.push(allocator, 6);
+    try array_list.push(allocator, 8);
+
+    try testing.expectEqual(8, array_list.pop());
+    try testing.expectEqual(6, array_list.pop());
+
+    try array_list.add_at(allocator, 0, 4);
+}
+
 test "init/deinit" {
-    var array_list: Array_List(u8) = try .init_capacity(testing.allocator, 1);
+    var array_list: ArrayList(u8) = try .init_capacity(testing.allocator, 1);
     defer array_list.deinit(testing.allocator);
 
     try testing.expectEqual(@as(usize, 0), array_list.count);
@@ -156,7 +173,7 @@ test "init/deinit" {
 
 test "push" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init_capacity(allocator, 2);
+    var array_list: ArrayList(u8) = try .init_capacity(allocator, 2);
     defer array_list.deinit(allocator);
 
     try array_list.push(allocator, 2);
@@ -170,7 +187,7 @@ test "push" {
 
 test "pop" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init_capacity(allocator, 2);
+    var array_list: ArrayList(u8) = try .init_capacity(allocator, 2);
     defer array_list.deinit(allocator);
 
     try testing.expectEqual(null, array_list.pop());
@@ -189,7 +206,7 @@ test "pop" {
 
 test "add at" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init(allocator);
+    var array_list: ArrayList(u8) = try .init(allocator);
     defer array_list.deinit(allocator);
 
     try array_list.add_at(allocator, 0, 4);
@@ -204,7 +221,7 @@ test "add at" {
 
 test "remove" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init_capacity(allocator, 2);
+    var array_list: ArrayList(u8) = try .init_capacity(allocator, 2);
     defer array_list.deinit(allocator);
 
     try testing.expect(!array_list.remove(6));
@@ -225,7 +242,7 @@ test "remove" {
 
 test "clear" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init_capacity(allocator, 10);
+    var array_list: ArrayList(u8) = try .init_capacity(allocator, 10);
     defer array_list.deinit(allocator);
 
     try array_list.push(allocator, 2);
@@ -246,7 +263,7 @@ test "clear" {
 
 test "contains" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init_capacity(allocator, 2);
+    var array_list: ArrayList(u8) = try .init_capacity(allocator, 2);
     defer array_list.deinit(allocator);
 
     try array_list.push(allocator, 2);
@@ -264,7 +281,7 @@ test "contains" {
 
 test "clone" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init_capacity(allocator, 10);
+    var array_list: ArrayList(u8) = try .init_capacity(allocator, 10);
     defer array_list.deinit(allocator);
 
     try array_list.push(allocator, 2);
@@ -276,7 +293,7 @@ test "clone" {
     try testing.expect(array_list.contains(4));
     try testing.expect(array_list.contains(9));
 
-    var cloned: Array_List(u8) = try array_list.clone(allocator);
+    var cloned: ArrayList(u8) = try array_list.clone(allocator);
     defer cloned.deinit(allocator);
 
     try testing.expectEqual(@as(usize, 5), cloned.count);
@@ -288,13 +305,13 @@ test "from slice" {
     const allocator = testing.allocator;
     var slice = [_]u8{ 1, 3, 4, 5, 7 };
 
-    var array_list: Array_List(u8) = try .from_slice(allocator, &slice);
+    var array_list: ArrayList(u8) = try .from_slice(allocator, &slice);
     defer array_list.deinit(allocator);
 }
 
 test "complete API" {
     const allocator = testing.allocator;
-    var array_list: Array_List(u8) = try .init(allocator);
+    var array_list: ArrayList(u8) = try .init(allocator);
     defer array_list.deinit(allocator);
 
     try testing.expectEqual(@as(usize, 0), array_list.count);
@@ -338,17 +355,17 @@ test "swarm test" {
     var prng: std.Random.DefaultPrng = .init(testing.random_seed);
     const random: std.Random = prng.random();
 
-    const ArrayList = Array_List(u8);
+    const Self = ArrayList(u8);
     const Model = std.ArrayList(u8);
 
-    var array_list: ArrayList = try .init_capacity(allocator, 100);
+    var array_list: Self = try .init_capacity(allocator, 100);
     defer array_list.deinit(allocator);
 
     var model: Model = try .initCapacity(allocator, 100);
     defer model.deinit(allocator);
 
     for (0..1000) |_| {
-        const swarm_testing = random.enumValue(std.meta.DeclEnum(ArrayList));
+        const swarm_testing = random.enumValue(std.meta.DeclEnum(Self));
         switch (swarm_testing) {
             .push => {
                 try array_list.push(allocator, 1);

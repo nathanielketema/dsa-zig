@@ -1,5 +1,5 @@
 const std = @import("std");
-const Stack = @import("stack.zig").Stack;
+const Stack = @import("dsa").Stack;
 const testing = std.testing;
 const assert = std.debug.assert;
 const Allocator = std.mem.Allocator;
@@ -521,7 +521,7 @@ fn BinarySearchTreeLinkedList(comptime T: type) type {
     };
 }
 
-test "binary search tree (linked list) operations: recursive" {
+test BinarySearchTreeWithImplementation {
     var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();

@@ -1,9 +1,10 @@
 const std = @import("std");
 const assert = std.debug.assert;
 const testing = std.testing;
-const bubble_sort = @import("bubble_sort.zig").bubble_sort;
+const bubble_sort = @import("dsa").bubble_sort;
 const Allocator = std.mem.Allocator;
 
+/// O(n log n) time complexity
 pub fn merge_sort(allocator: Allocator, comptime T: type, items: []T) !void {
     if (items.len <= 1) return;
 
@@ -72,7 +73,7 @@ fn merge(
     }
 }
 
-test "merge_sort u8" {
+test merge_sort {
     var items = [_]u8{ 1, 7, 2, 6 };
     try merge_sort(testing.allocator, u8, &items);
     try testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 6, 7 }, &items);

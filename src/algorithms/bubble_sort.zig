@@ -2,6 +2,7 @@ const std = @import("std");
 const assert = std.debug.assert;
 const testing = std.testing;
 
+/// O(n²) time complexity
 pub fn bubble_sort(comptime T: type, items: []T) void {
     if (items.len == 0) return;
     var swapped: bool = undefined;
@@ -20,7 +21,7 @@ pub fn bubble_sort(comptime T: type, items: []T) void {
     }
 }
 
-test "test" {
+test bubble_sort {
     var array = [_]u8{ 5, 3, 4, 1, 2 };
     bubble_sort(u8, &array);
 

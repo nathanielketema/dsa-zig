@@ -87,6 +87,28 @@ pub fn Stack(comptime T: type) type {
     };
 }
 
+test Stack {
+    var stack: Stack(u8) = .init(testing.allocator);
+    defer stack.deinit();
+
+    try testing.expect(stack.count == 0);
+    try testing.expect(stack.empty());
+    try testing.expect(stack.pop() == null);
+    try testing.expect(stack.peek() == null);
+
+    try stack.push(12);
+    try stack.push(42);
+    try stack.push(3);
+    try stack.push(0);
+
+    try testing.expect(stack.count == 4);
+    try testing.expect(stack.contains(3));
+    try testing.expectEqual(stack.peek().?.*, 0);
+
+    try testing.expectEqual(stack.pop().?, 0);
+    try testing.expectEqual(stack.pop().?, 3);
+}
+
 test "test stack operations" {
     var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer assert(gpa.deinit() == .ok);

@@ -132,12 +132,37 @@ pub fn Heap(comptime T: type, mode: HeapMode) type {
     };
 }
 
+test Heap {
+    var heap: Heap(u8, .min) = try .init_capacity(testing.allocator, 10);
+    defer heap.deinit();
+
+    try testing.expectEqual(0, heap.count);
+    try testing.expect(heap.count == heap.nodes.items.len);
+
+    try heap.add(1);
+    try heap.add(9);
+    try heap.add(0);
+}
+
 test "init" {
     var heap: Heap(u8, .min) = try .init_capacity(testing.allocator, 10);
     defer heap.deinit();
 
     try testing.expectEqual(0, heap.count);
     try testing.expect(heap.count == heap.nodes.items.len);
+
+    try heap.add(5);
+    try heap.add(1);
+    try heap.add(9);
+    try heap.add(0);
+
+    try testing.expectEqual(0, heap.pop());
+    try testing.expectEqual(1, heap.pop());
+
+    var it = heap.iterator();
+    while (it.next()) |_| {
+        // do something
+    }
 }
 
 test "add" {

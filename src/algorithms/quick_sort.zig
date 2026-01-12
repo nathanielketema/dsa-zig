@@ -2,6 +2,7 @@ const std = @import("std");
 const assert = std.debug.assert;
 const testing = std.testing;
 
+/// O(n log n) average time complexity
 pub fn quick_sort(comptime T: type, items: []T) void {
     if (items.len <= 1) return;
     quick_sort_helper(T, items, 0, items.len - 1);
@@ -36,7 +37,7 @@ fn partition(comptime T: type, items: []T, low: usize, high: usize) usize {
     return i;
 }
 
-test "test" {
+test quick_sort {
     var array = [_]u8{ 5, 3, 4, 1, 2 };
     quick_sort(u8, &array);
 

@@ -3,7 +3,7 @@ const assert = std.debug.assert;
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
-pub fn Hash_Map(comptime K: type, comptime V: type) type {
+pub fn HashMap(comptime K: type, comptime V: type) type {
     return struct {
         keys: []?K,
         values: []V,
@@ -11,7 +11,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
         capacity: usize,
         allocator: Allocator,
 
-        const HashMap = @This();
+        const Self = @This();
         const load_factor_percent = 80;
         const default_capacity = 100;
 
@@ -21,7 +21,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
         };
 
         pub const Iterator = struct {
-            hash_map: *const HashMap,
+            hash_map: *const Self,
             index: usize,
 
             pub fn next(self: *Iterator) ?Entry {
@@ -40,12 +40,12 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
         };
 
         /// Caller must free memory using deinit()
-        pub fn init(allocator: Allocator) Allocator.Error!HashMap {
+        pub fn init(allocator: Allocator) Allocator.Error!Self {
             return init_capacity(allocator, default_capacity);
         }
 
         /// Caller must free memory using deinit()
-        pub fn init_capacity(allocator: Allocator, capacity: usize) Allocator.Error!HashMap {
+        pub fn init_capacity(allocator: Allocator, capacity: usize) Allocator.Error!Self {
             assert(capacity > 0);
 
             const key = try allocator.alloc(?K, capacity);
@@ -61,7 +61,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
             };
         }
 
-        pub fn deinit(hash_map: *HashMap) void {
+        pub fn deinit(hash_map: *Self) void {
             assert(hash_map.count <= hash_map.capacity);
 
             hash_map.allocator.free(hash_map.keys);
@@ -69,7 +69,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
             hash_map.* = undefined;
         }
 
-        pub fn put(hash_map: *HashMap, key: K, value: V) Allocator.Error!void {
+        pub fn put(hash_map: *Self, key: K, value: V) Allocator.Error!void {
             assert(hash_map.count <= hash_map.capacity);
 
             const it_should_grow = (hash_map.count * 100) >= (hash_map.capacity * load_factor_percent);
@@ -96,7 +96,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
             }
         }
 
-        pub fn remove(hash_map: *HashMap, key: K) Allocator.Error!bool {
+        pub fn remove(hash_map: *Self, key: K) Allocator.Error!bool {
             assert(hash_map.count < hash_map.capacity);
 
             var index = hash_key(key, hash_map.capacity);
@@ -117,21 +117,21 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
             return false;
         }
 
-        pub fn iterator(hash_map: *const HashMap) Iterator {
+        pub fn iterator(hash_map: *const Self) Iterator {
             return .{
                 .hash_map = hash_map,
                 .index = 0,
             };
         }
 
-        pub fn clear(hash_map: *HashMap) void {
+        pub fn clear(hash_map: *Self) void {
             assert(hash_map.count <= hash_map.capacity);
             @memset(hash_map.keys, null);
             @memset(hash_map.values, undefined);
             hash_map.count = 0;
         }
 
-        pub fn get(hash_map: *const HashMap, key: K) ?V {
+        pub fn get(hash_map: *const Self, key: K) ?V {
             assert(hash_map.count <= hash_map.capacity);
 
             var index = hash_key(key, hash_map.capacity);
@@ -146,7 +146,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
             return null;
         }
 
-        pub fn contains(hash_map: *const HashMap, key: K) bool {
+        pub fn contains(hash_map: *const Self, key: K) bool {
             assert(hash_map.count <= hash_map.capacity);
 
             var index = hash_key(key, hash_map.capacity);
@@ -162,7 +162,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
         }
 
         /// Caller must free memory using deinit()
-        pub fn clone(hash_map: *const HashMap) Allocator.Error!HashMap {
+        pub fn clone(hash_map: *const Self) Allocator.Error!Self {
             assert(hash_map.count <= hash_map.capacity);
 
             var new_clone = try init_capacity(hash_map.allocator, hash_map.capacity);
@@ -175,7 +175,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
         }
 
         // This grows the hash_map
-        fn new(hash_map: *HashMap, new_capacity: usize) Allocator.Error!void {
+        fn new(hash_map: *Self, new_capacity: usize) Allocator.Error!void {
             assert(new_capacity > 0);
             assert(new_capacity >= hash_map.capacity);
 
@@ -206,7 +206,7 @@ pub fn Hash_Map(comptime K: type, comptime V: type) type {
 }
 
 test "init" {
-    var hash_map: Hash_Map(u8, bool) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, bool) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try testing.expect(hash_map.capacity > 0);
@@ -214,7 +214,7 @@ test "init" {
 }
 
 test "put u8:[]const u8" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -225,7 +225,7 @@ test "put u8:[]const u8" {
 }
 
 test "put u8: u64" {
-    var hash_map: Hash_Map(u8, u64) = try .init_capacity(testing.allocator, 1);
+    var hash_map: HashMap(u8, u64) = try .init_capacity(testing.allocator, 1);
     defer hash_map.deinit();
 
     try hash_map.put(99, 1);
@@ -235,8 +235,8 @@ test "put u8: u64" {
     try testing.expectEqual(@as(usize, 3), hash_map.count);
 }
 
-test "iterator" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+test HashMap {
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -253,7 +253,7 @@ test "iterator" {
 }
 
 test "remove" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -269,7 +269,7 @@ test "remove" {
 }
 
 test "clear" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -281,7 +281,7 @@ test "clear" {
 }
 
 test "get" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -294,7 +294,7 @@ test "get" {
 }
 
 test "contains" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -308,7 +308,7 @@ test "contains" {
 }
 
 test "clone" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -325,7 +325,7 @@ test "clone" {
 }
 
 test "complete API" {
-    var hash_map: Hash_Map(u8, []const u8) = try .init(testing.allocator);
+    var hash_map: HashMap(u8, []const u8) = try .init(testing.allocator);
     defer hash_map.deinit();
 
     try hash_map.put(1, "hello");
@@ -355,10 +355,10 @@ test "complete API" {
 }
 
 test "swarm testing" {
-    const HashMap = Hash_Map(u8, []const u8);
+    const Self = HashMap(u8, []const u8);
     const Model = std.AutoHashMap(u8, []const u8);
 
-    var hash_map: HashMap = try .init(testing.allocator);
+    var hash_map: Self = try .init(testing.allocator);
     defer hash_map.deinit();
 
     var model: Model = .init(testing.allocator);
@@ -369,7 +369,7 @@ test "swarm testing" {
 
     assert(hash_map.count == model.count());
     for (0..1000) |_| {
-        const swarm_distribution = random.enumValue(std.meta.DeclEnum(HashMap));
+        const swarm_distribution = random.enumValue(std.meta.DeclEnum(Self));
         switch (swarm_distribution) {
             .put => {
                 const key = random.int(u8) % 100;
