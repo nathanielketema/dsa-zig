@@ -31,6 +31,26 @@ exe.root_module.addImport("dsa", dsa.module("dsa"));
 const dsa = @import("dsa");
 ```
 
+## Documentation
+
+This library comes with it's own documentation page.
+
+To access the docs:
+
+```console
+zig build docs
+```
+
+You can then use any static HTTP server to view the generated page.
+
+- example using `http-server`
+
+  ```console
+  http-server ./zig-out/docs/index.html
+  ```
+
+  then open you browser to view the [page](localhost:8080)
+
 ### Example
 
 Using a Stack:
