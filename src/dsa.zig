@@ -5,8 +5,6 @@
 //! Enjoy :)
 
 const std = @import("std");
-const assert = std.debug.assert;
-const testing = std.testing;
 
 // Data Structures
 pub const Stack = @import("data-structures/stack.zig").Stack;
