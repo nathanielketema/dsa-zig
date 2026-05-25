@@ -6,6 +6,8 @@
 
 const std = @import("std");
 
+// TODO(#1): add custom format functions to make printing nicer
+
 // Data Structures
 pub const Stack = @import("data-structures/stack.zig").Stack;
 pub const Queue = @import("data-structures/queue.zig").Queue;
