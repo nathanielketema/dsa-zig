@@ -4,41 +4,29 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const dsa_module = b.addModule("dsa", .{
+    const dsa = b.addModule("dsa", .{
         .root_source_file = b.path("src/dsa.zig"),
         .target = target,
         .optimize = optimize,
     });
+    dsa.addImport("dsa", dsa); // To make dsa's depend on each other
 
-    dsa_module.addImport("dsa", dsa_module);
-
-    const docs_module = b.createModule(.{
-        .root_source_file = b.path("src/dsa.zig"),
-        .target = target,
-        .optimize = optimize,
+    const tests = b.addTest(.{
+        .root_module = dsa,
     });
-    docs_module.addImport("dsa", docs_module);
+    const test_run = b.addRunArtifact(tests);
+    const test_step = b.step("test", "Test library");
+    test_step.dependOn(&test_run.step);
 
-    const lib = b.addLibrary(.{
-        .name = "dsa",
-        .linkage = .static,
-        .root_module = docs_module,
+    const docs = b.addLibrary(.{
+        .name = "dvui",
+        .root_module = dsa,
     });
-
-    const install_docs = b.addInstallDirectory(.{
-        .source_dir = lib.getEmittedDocs(),
+    const docs_install = b.addInstallDirectory(.{
+        .source_dir = docs.getEmittedDocs(),
         .install_dir = .prefix,
         .install_subdir = "docs",
     });
-
-    const docs_step = b.step("docs", "Generate documentation");
-    docs_step.dependOn(&install_docs.step);
-
-    const tests = b.addTest(.{
-        .root_module = dsa_module,
-    });
-
-    const run_tests = b.addRunArtifact(tests);
-    const test_step = b.step("test", "Run all tests");
-    test_step.dependOn(&run_tests.step);
+    const docs_step = b.step("docs", "Build documentation");
+    docs_step.dependOn(&docs_install.step);
 }

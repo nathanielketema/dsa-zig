@@ -37,6 +37,25 @@ fn partition(comptime T: type, items: []T, low: usize, high: usize) usize {
     return i;
 }
 
+// food for thought
+fn foo_quick_sort(xs: []u32) void {
+    if (xs.len <= 1) return;
+    var lt_count: usize = 0;
+    var gt_count: usize = 0;
+    var pivot_index: usize = 0;
+
+    for (1..xs.len) |index| {
+        if (xs[index] < xs[pivot_index]) {
+            std.mem.swap(u32, &xs[index], &xs[pivot_index]);
+            lt_count += 1;
+            pivot_index += 1;
+            std.mem.swap(u32, &xs[index], &xs[lt_count]);
+        } else gt_count += 1;
+    }
+    foo_quick_sort(xs[0..lt_count]);
+    foo_quick_sort(xs[lt_count + 1..]);
+}
+
 test quick_sort {
     var array = [_]u8{ 5, 3, 4, 1, 2 };
     quick_sort(u8, &array);

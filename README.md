@@ -1,31 +1,26 @@
-# Data Structures and Algorithms (DSA) using zig
+# Useful data structures and algorithms (DSA)
 
-This codebase contains common data structures and algorithms
-in [zig](https://ziglang.org/). It's tailored for beginners learning DSA or
-for programmers exploring the language.
+This library contains useful data structures and algorithms
+in [zig](https://ziglang.org/).
 
-## Setup
-
-To use these data structures and algorithms in your own codebase:
-
-1. Add this as a dependency in your `build.zig.zon` file:
+## Start
 
 ```console
 zig fetch --save git+https://github.com/nathanielketema/dsa-zig.git
 ```
 
-2.  Next step is to add it to your `build.zig`:
+Then, add this to your `build.zig`:
 
 ```zig
 const dsa = b.dependency("dsa_zig", .{
     .target = target,
     .optimize = optimize,
 });
-
+// ...
 exe.root_module.addImport("dsa", dsa.module("dsa"));
 ```
 
-3. Finally, you can use it by importing it to your code base:
+Finally, import and start using it:
 
 ```zig
 const dsa = @import("dsa");
@@ -33,7 +28,7 @@ const dsa = @import("dsa");
 
 ## Documentation
 
-This library comes with it's own documentation page.
+This library comes with its own documentation page.
 
 To access the docs:
 
@@ -41,29 +36,19 @@ To access the docs:
 zig build docs
 ```
 
-You can then use any static HTTP server to view the generated page.
-
-- example using `http-server`
-
-  ```console
-  http-server zig-out/docs/
-  ```
-
-### Example
+## Example
 
 Using a Stack:
 
 ```zig
 const std = @import("std");
+const assert = std.debug.assert;
+
 const dsa = @import("dsa");
 const Stack = dsa.Stack;
 
-pub fn main() !void {
-    var gpa: std.heap.DebugAllocator(.{}) = .init;
-    defer assert(gpa.deinit() == .ok);
-    const allocator = gpa.allocator();
-
-    var stack: Stack(u8) = .init(allocator);
+pub fn main(init: std.process.Init) !void {
+    var stack: Stack(u8) = .init(init.gpa);
     defer stack.deinit();
 
     try stack.push(1);
